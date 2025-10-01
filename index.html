@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Tabungan - Sederhana</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#ff8a00;--muted:#9aa4b2;--success:#16a34a}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:linear-gradient(180deg,#071028 0%,#0b1220 100%);color:#e6eef8;padding:20px}
+    .wrap{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    .list{max-height:60vh;overflow:auto;margin-top:12px}
+    .item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;background:transparent}
+    .item + .item{border-top:1px dashed rgba(255,255,255,0.03)}
+    .controls{display:flex;gap:8px}
+    button{background:var(--accent);border:none;color:#061223;padding:8px 10px;border-radius:8px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    input,select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    label{font-size:12px;color:var(--muted)}
+    .small{font-size:13px;color:var(--muted)}
+    .admin-only{display:none}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .login-panel{display:flex;flex-direction:column;gap:8px}
+    .danger{color:#ff5959}
+    .success{color:var(--success)}
+    .topline{display:flex;gap:12px;align-items:center}
+
+    @media(max-width:820px){.grid{grid-template-columns:1fr;}.wrap{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Dashboard Tabungan</h1>
+        <div class="small">Publik: ringkasan & saldo. Admin: login untuk edit data.</div>
+      </div>
+      <div class="topline">
+        <div id="status" class="small">Memuat...</div>
+        <button id="btnLogin">Login Admin</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <main>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="small">Total Nasabah</div>
+              <h2 id="totalCount">–</h2>
+            </div>
+            <div>
+              <div class="small">Total Saldo (IDR)</div>
+              <h2 id="totalBalance">–</h2>
+            </div>
+          </div>
+
+          <div class="list" id="customerList"></div>
+        </div>
+      </main>
+
+      <aside>
+        <div class="card">
+          <div class="small">Kontrol Cepat</div>
+          <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+            <button id="btnAddSample">Tambah Sample</button>
+            <button id="btnSync" class="ghost">Sinkron (server)</button>
+            <button id="btnExport" class="ghost">Export JSON</button>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px dashed rgba(255,255,255,0.03)">
+
+          <div class="small" style="margin-bottom:8px">Panel Login Admin</div>
+          <div class="login-panel">
+            <input id="inputAdminPassword" placeholder="Kata sandi admin" type="password">
+            <div style="display:flex;gap:8px">
+              <button id="performLogin">Masuk</button>
+              <button id="logout" class="ghost">Keluar</button>
+            </div>
+            <div class="small">*Kata sandi diverifikasi di server (lebih aman).</div>
+          </div>
+
+        </div>
+
+        <div class="card admin-only" style="margin-top:12px" id="adminPanel">
+          <div class="small">Admin: Tambah / Edit Nasabah</div>
+
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+            <label class="small">Nama</label>
+            <input id="inpName">
+            <label class="small">Saldo awal (angka saja)</label>
+            <input id="inpBalance" type="number" step="0.01" min="0">
+            <div style="display:flex;gap:8px">
+              <button id="saveNew">Simpan Nasabah</button>
+              <button id="cancelEdit" class="ghost">Batal</button>
+            </div>
+          </div>
+
+          <hr style="margin:12px 0;border:none;border-top:1px dashed rgba(255,255,255,0.03)">
+
+          <div class="small">Edit Cepat (pilih nasabah lalu gunakan tombol di daftar)</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      Proyek siap deploy di GitHub + Vercel. Kunci JSONBin & password admin disimpan di Environment Vercel (server), bukan di front-end.
+    </footer>
+  </div>
+
+<script>
+// ===== Front-end logic (panggil API Vercel) =====
+const fmt = (v) => new Intl.NumberFormat('id-ID', {minimumFractionDigits:0, maximumFractionDigits:2}).format(Number(v||0));
+let state = { customers: [], updatedAt: null };
+let adminLoggedIn = false;
+let editingId = null;
+
+const statusEl = document.getElementById('status');
+const totalCount = document.getElementById('totalCount');
+const totalBalance = document.getElementById('totalBalance');
+const customerList = document.getElementById('customerList');
+const btnLogin = document.getElementById('btnLogin');
+const btnAddSample = document.getElementById('btnAddSample');
+const btnSync = document.getElementById('btnSync');
+const btnExport = document.getElementById('btnExport');
+const adminPanel = document.getElementById('adminPanel');
+const performLogin = document.getElementById('performLogin');
+const logoutBtn = document.getElementById('logout');
+const inputAdminPassword = document.getElementById('inputAdminPassword');
+const inpName = document.getElementById('inpName');
+const inpBalance = document.getElementById('inpBalance');
+const saveNew = document.getElementById('saveNew');
+const cancelEdit = document.getElementById('cancelEdit');
+
+function getToken(){ return sessionStorage.getItem('tabungan_token') || null; }
+function setToken(t){ if(t) sessionStorage.setItem('tabungan_token', t); else sessionStorage.removeItem('tabungan_token'); }
+
+async function apiGet(){
+  const res = await fetch('/api/tabungan');
+  if(!res.ok) throw new Error('Gagal memuat');
+  return await res.json();
+}
+async function apiPut(data){
+  const token = getToken();
+  if(!token) throw new Error('Belum login');
+  const res = await fetch('/api/tabungan',{
+    method:'PUT', headers:{ 'Content-Type':'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify(data)
+  });
+  if(res.status===401){ throw new Error('Unauthorized'); }
+  if(!res.ok) throw new Error('Gagal simpan');
+  return await res.json();
+}
+async function apiLogin(password){
+  const res = await fetch('/api/login',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password }) });
+  if(!res.ok) throw new Error('Login gagal');
+  return await res.json();
+}
+
+async function loadData(){
+  statusEl.textContent = 'Memuat data dari server...';
+  try{
+    const j = await apiGet();
+    state = j;
+    render();
+    statusEl.textContent = 'Data dimuat dari server';
+  }catch(e){
+    console.warn(e);
+    statusEl.textContent = 'Gagal memuat dari server';
+  }
+}
+
+function render(){
+  totalCount.textContent = state.customers?.length || 0;
+  const tot = (state.customers||[]).reduce((s,c)=>s+Number(c.balance||0),0);
+  totalBalance.textContent = fmt(tot);
+
+  customerList.innerHTML = '';
+  (state.customers||[]).forEach(c=>{
+    const el = document.createElement('div'); el.className='item';
+    el.innerHTML = `
+      <div>
+        <div style="font-weight:600">${escapeHtml(c.name)}</div>
+        <div class="small">ID: ${c.id}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-weight:600">Rp ${fmt(c.balance)}</div>
+        <div class="controls small">` + (adminLoggedIn ? `
+          <button data-id="${c.id}" class="btnInc">+</button>
+          <button data-id="${c.id}" class="btnDec">-</button>
+          <button data-id="${c.id}" class="btnEdit ghost">Edit</button>
+          <button data-id="${c.id}" class="btnDel danger ghost">Hapus</button>
+        ` : '') + `</div>
+      </div>`;
+    customerList.appendChild(el);
+  });
+
+  if(adminLoggedIn){
+    document.querySelectorAll('.btnInc').forEach(b=>b.addEventListener('click',()=> quickAdjust(b.dataset.id, true)));
+    document.querySelectorAll('.btnDec').forEach(b=>b.addEventListener('click',()=> quickAdjust(b.dataset.id, false)));
+    document.querySelectorAll('.btnEdit').forEach(b=>b.addEventListener('click',()=> startEdit(b.dataset.id)));
+    document.querySelectorAll('.btnDel').forEach(b=>b.addEventListener('click',async()=>{ if(confirm('Hapus nasabah?')){ deleteCustomer(b.dataset.id); await pushSave(); }}));
+  }
+}
+
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+function uuidv4(){return 'xxxx-4xxx-yxxx-xxxx'.replace(/[xy]/g, function(c){var r=Math.random()*16|0,v=c=='x'?r:(r&0x3|0x8);return v.toString(16);});}
+
+function quickAdjust(id, isInc){
+  const step = prompt('Masukkan jumlah (angka). Gunakan minus untuk kurangi jika perlu:', '100000');
+  if(step===null) return;
+  const num = Number(step);
+  if(isNaN(num)){ alert('Bukan angka valid'); return; }
+  const idx = state.customers.findIndex(x=>x.id===id); if(idx<0) return;
+  state.customers[idx].balance = Number(state.customers[idx].balance||0) + (isInc?num:-num);
+  render();
+  pushSave();
+}
+
+function startEdit(id){
+  const c = state.customers.find(x=>x.id===id); if(!c) return;
+  editingId = id; inpName.value = c.name; inpBalance.value = c.balance; saveNew.textContent = 'Update Nasabah'; adminPanel.scrollIntoView({behavior:'smooth'});
+}
+
+function deleteCustomer(id){ state.customers = state.customers.filter(x=>x.id!==id); render(); }
+
+async function pushSave(){
+  try{
+    state.updatedAt = new Date().toISOString();
+    await apiPut(state);
+    statusEl.textContent = 'Tersimpan di server';
+  }catch(e){
+    console.warn(e);
+    if(String(e.message).includes('Unauthorized')){
+      alert('Sesi login berakhir / tidak valid. Silakan login lagi.');
+      adminLoggedIn=false; showAdmin(false);
+    } else {
+      statusEl.textContent = 'Gagal simpan ke server';
+    }
+  }
+}
+
+saveNew.addEventListener('click', async()=>{
+  const name = inpName.value.trim(); const bal = Number(inpBalance.value||0);
+  if(!name){ alert('Nama wajib diisi'); return; }
+  if(editingId){
+    const idx = state.customers.findIndex(x=>x.id===editingId); if(idx<0) return;
+    state.customers[idx].name = name; state.customers[idx].balance = bal; editingId=null; saveNew.textContent='Simpan Nasabah';
+  } else {
+    if(!state.customers) state.customers=[];
+    state.customers.push({ id: uuidv4(), name, balance: bal });
+  }
+  inpName.value=''; inpBalance.value=''; render(); await pushSave();
+});
+
+cancelEdit.addEventListener('click', ()=>{ editingId=null; inpName.value=''; inpBalance.value=''; saveNew.textContent='Simpan Nasabah'; });
+
+btnLogin.addEventListener('click', ()=>{ document.getElementById('inputAdminPassword').focus(); });
+performLogin.addEventListener('click', async()=>{
+  const val = inputAdminPassword.value||'';
+  try{
+    const j = await apiLogin(val);
+    setToken(j.token); adminLoggedIn=true; showAdmin(true); inputAdminPassword.value=''; alert('Login berhasil');
+  }catch(e){ alert('Kata sandi salah / login gagal'); }
+});
+logoutBtn.addEventListener('click', ()=>{ adminLoggedIn=false; showAdmin(false); setToken(null); });
+
+function showAdmin(show){
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display= show? 'block':'none');
+  if(show) btnLogin.textContent='Admin (ON)'; else btnLogin.textContent='Login Admin';
+  render();
+}
+
+btnAddSample.addEventListener('click', async()=>{
+  if(!state.customers) state.customers=[];
+  state.customers.push({ id: uuidv4(), name: 'Budi', balance: 250000 });
+  state.customers.push({ id: uuidv4(), name: 'Siti', balance: 500000 });
+  render();
+  if(adminLoggedIn) await pushSave();
+});
+
+btnSync.addEventListener('click', async()=>{
+  if(!adminLoggedIn) return alert('Login sebagai admin untuk sinkron.');
+  await pushSave();
+});
+
+btnExport.addEventListener('click', ()=>{
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+  const a = document.createElement('a'); a.setAttribute('href', dataStr); a.setAttribute('download', 'tabungan_export.json'); document.body.appendChild(a); a.click(); a.remove();
+});
+
+loadData().catch(e=>{ console.error(e); statusEl.textContent='Error load'; });
+</script>
+</body>
+</html>
