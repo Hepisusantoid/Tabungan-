@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tabungan Saya</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#ff8a00;--muted:#9aa4b2}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:linear-gradient(180deg,#071028 0%,#0b1220 100%);color:#e6eef8;padding:20px}
+    .wrap{max-width:720px;margin:0 auto}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    h1{font-size:20px;margin:0 0 8px}
+    .small{color:var(--muted);font-size:13px}
+    .row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+    button{background:var(--accent);border:none;color:#061223;padding:8px 10px;border-radius:8px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Tabungan Saya</h1>
+      <div class="small" id="hint">Halaman ini menampilkan saldo nasabah berdasarkan tautan aman.</div>
+      <div class="row"><div class="small">Nama</div><div id="name">–</div></div>
+      <div class="row"><div class="small">ID</div><div id="cid">–</div></div>
+      <div class="row"><div class="small">Saldo (IDR)</div><div id="balance" style="font-weight:700;font-size:22px">–</div></div>
+      <div class="row"><div class="small">Terakhir diperbarui</div><div id="updated">–</div></div>
+      <div style="margin-top:12px"><button id="refresh">Refresh</button></div>
+    </div>
+  </div>
+<script>
+const fmt = (v) => new Intl.NumberFormat('id-ID',{maximumFractionDigits:2}).format(Number(v||0));
+const q = new URLSearchParams(location.search);
+const id = q.get('id');
+const token = q.get('token');
+const exp = q.get('exp');
+const nameEl = document.getElementById('name');
+const cidEl = document.getElementById('cid');
+const balEl = document.getElementById('balance');
+const updEl = document.getElementById('updated');
+const hint = document.getElementById('hint');
+
+async function load(){
+  if(!(id && token)){
+    hint.textContent = 'Tautan tidak lengkap. Minta tautan baru dari admin.';
+    return;
+  }
+  try{
+    const url = `/api/nasabah?id=${encodeURIComponent(id)}&token=${encodeURIComponent(token)}${exp?`&exp=${encodeURIComponent(exp)}`:''}`;
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('Akses ditolak / tautan kedaluwarsa');
+    const j = await r.json();
+    nameEl.textContent = j.name || '-';
+    cidEl.textContent = j.id || id;
+    balEl.textContent = 'Rp ' + fmt(j.balance);
+    updEl.textContent = j.updatedAt ? new Date(j.updatedAt).toLocaleString('id-ID') : '-';
+    hint.textContent = 'Tautan aman. Bagikan hanya kepada pemilik akun.';
+  }catch(e){
+    hint.textContent = 'Gagal memuat: ' + e.message;
+  }
+}
+
+document.getElementById('refresh').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>
