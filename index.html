@@ -16,7 +16,7 @@
     .list{max-height:60vh;overflow:auto;margin-top:12px}
     .item{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;background:transparent}
     .item + .item{border-top:1px dashed rgba(255,255,255,0.03)}
-    .controls{display:flex;gap:8px}
+    .controls{display:flex;gap:8px;justify-content:flex-end}
     button{background:var(--accent);border:none;color:#061223;padding:8px 10px;border-radius:8px;cursor:pointer}
     button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
     input,select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
@@ -94,7 +94,7 @@
             <input id="inpName">
             <label class="small">Saldo awal (angka saja)</label>
             <input id="inpBalance" type="number" step="0.01" min="0">
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button id="saveNew">Simpan Nasabah</button>
               <button id="cancelEdit" class="ghost">Batal</button>
             </div>
@@ -108,7 +108,7 @@
     </div>
 
     <footer>
-      Proyek siap deploy di GitHub + Vercel. Kunci JSONBin & password admin disimpan di Environment Vercel (server), bukan di front-end.
+      Proyek siap deploy di GitHub + Vercel. Kunci JSONBin & password admin disimpan di Environment Vercel (server), bukan di front-end. Halaman nasabah: <code>/nasabah.html?id=...&exp=...&token=...</code>
     </footer>
   </div>
 
@@ -159,6 +159,16 @@ async function apiLogin(password){
   if(!res.ok) throw new Error('Login gagal');
   return await res.json();
 }
+async function apiGenLink(id, ttlMinutes){
+  const token = getToken();
+  if(!token) throw new Error('Belum login');
+  const res = await fetch('/api/generate-link',{
+    method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ id, ttlMinutes })
+  });
+  if(res.status===401){ throw new Error('Unauthorized'); }
+  if(!res.ok) throw new Error('Gagal buat tautan');
+  return await res.json();
+}
 
 async function loadData(){
   statusEl.textContent = 'Memuat data dari server...';
@@ -192,6 +202,7 @@ function render(){
           <button data-id="${c.id}" class="btnInc">+</button>
           <button data-id="${c.id}" class="btnDec">-</button>
           <button data-id="${c.id}" class="btnEdit ghost">Edit</button>
+          <button data-id="${c.id}" class="btnLink ghost">Link</button>
           <button data-id="${c.id}" class="btnDel danger ghost">Hapus</button>
         ` : '') + `</div>
       </div>`;
@@ -203,6 +214,7 @@ function render(){
     document.querySelectorAll('.btnDec').forEach(b=>b.addEventListener('click',()=> quickAdjust(b.dataset.id, false)));
     document.querySelectorAll('.btnEdit').forEach(b=>b.addEventListener('click',()=> startEdit(b.dataset.id)));
     document.querySelectorAll('.btnDel').forEach(b=>b.addEventListener('click',async()=>{ if(confirm('Hapus nasabah?')){ deleteCustomer(b.dataset.id); await pushSave(); }}));
+    document.querySelectorAll('.btnLink').forEach(b=>b.addEventListener('click',()=> generateLink(b.dataset.id)));
   }
 }
 
@@ -218,6 +230,24 @@ function quickAdjust(id, isInc){
   state.customers[idx].balance = Number(state.customers[idx].balance||0) + (isInc?num:-num);
   render();
   pushSave();
+}
+
+async function generateLink(id){
+  try{
+    const ttl = prompt('Link berlaku berapa menit? (default 10080 = 7 hari)', '10080');
+    const ttlMinutes = Math.max(1, Number(ttl||10080));
+    const j = await apiGenLink(id, ttlMinutes);
+    const url = j.url || (location.origin + j.path);
+    await copyToClipboard(url);
+    alert('Tautan nasabah disalin:\n' + url);
+  }catch(e){ alert('Gagal buat tautan: ' + e.message); }
+}
+
+async function copyToClipboard(text){
+  try{ await navigator.clipboard.writeText(text); }
+  catch(_){
+    const ta = document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
 }
 
 function startEdit(id){
