@@ -1,9 +1,9 @@
 /**
  * POST /api/login { password }
- *  - jika benar, balas { token, expiresAt }
+ * - jika benar, balas { token, expiresAt }
  * ENV:
- *  - ADMIN_PASSWORD (kata sandi admin)
- *  - JWT_SECRET (string acak panjang)
+ * - ADMIN_PASSWORD (kata sandi admin)
+ * - JWT_SECRET (string acak panjang)
  */
 
 const crypto = require('crypto');
