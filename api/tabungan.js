@@ -2,14 +2,13 @@
  * GET  /api/tabungan  -> ambil data { customers:[], updatedAt }
  * PUT  /api/tabungan  -> simpan data (perlu Authorization: Bearer <token>)
  * ENV (set di Vercel: Project Settings → Environment Variables):
- *   JSONBIN_API_KEY (X-Master-Key)
- *   BIN_ID          (ID bin JSONBin)
- *   JWT_SECRET      (untuk verifikasi token)
+ * JSONBIN_API_KEY (X-Master-Key)
+ * BIN_ID          (ID bin JSONBin)
+ * JWT_SECRET      (untuk verifikasi token)
  */
 
 const crypto = require('crypto');
 
-function b64url(input){ return Buffer.from(input).toString('base64').replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_'); }
 function verifyJWT(token, secret){
   try{
     const [h,p,s] = token.split('.');
@@ -26,7 +25,6 @@ async function jsonbinGet(){
   const BIN_ID = process.env.BIN_ID; const KEY = process.env.JSONBIN_API_KEY;
   const r = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { headers: { 'X-Master-Key': KEY, 'X-Bin-Meta': 'false' }});
   if(!r.ok) throw new Error('JSONBin GET failed: '+r.status);
-  // dengan X-Bin-Meta:false respons langsung adalah record; jika tidak, fallback ke j.record
   const j = await r.json();
   return j && j.record ? j.record : j;
 }
@@ -43,7 +41,6 @@ module.exports = async function handler(req, res){
   try{
     if(req.method==='GET'){
       const data = await jsonbinGet();
-      // pastikan struktur minimal
       if(!data.customers) data.customers = [];
       return res.status(200).send(JSON.stringify(data));
     }
