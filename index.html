@@ -8,16 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <!-- NAV: Beranda saja (disembunyikan otomatis di link publik) -->
-  <header class="topbar" id="topbar">
+<body class="aurora">
+  <!-- NAV (disembunyikan di link publik) -->
+  <header class="topbar glass" id="topbar">
     <nav class="nav">
       <a href="#" data-tab="beranda" class="chip active">Beranda</a>
     </nav>
   </header>
 
   <!-- LOGIN -->
-  <section id="login-section" class="card tab beranda-tab">
+  <section id="login-section" class="card glass tab beranda-tab">
     <h2>Login Admin</h2>
     <div class="row">
       <input id="user" placeholder="Username">
@@ -28,7 +28,7 @@
   </section>
 
   <!-- DASHBOARD / ADMIN -->
-  <section id="dashboard" class="card tab beranda-tab" style="display:none">
+  <section id="dashboard" class="card glass tab beranda-tab" style="display:none">
     <div class="row between">
       <h1>Dashboard Tabungan</h1>
       <button id="btnLogout" class="secondary small">Keluar</button>
@@ -36,18 +36,18 @@
     <p id="msg" class="warn"></p>
 
     <div class="stats">
-      <div class="stat"><small>Total Nasabah</small><h2 id="statNasabah">0</h2></div>
-      <div class="stat"><small>Total Saldo</small><h2 id="statSaldo">Rp 0</h2></div>
-      <div class="stat"><small>Saldo Rata-rata</small><h2 id="statRata">Rp 0</h2></div>
+      <div class="stat glass-sm"><small>Total Nasabah</small><h2 id="statNasabah">0</h2></div>
+      <div class="stat glass-sm"><small>Total Saldo</small><h2 id="statSaldo">Rp 0</h2></div>
+      <div class="stat glass-sm"><small>Saldo Rata-rata</small><h2 id="statRata">Rp 0</h2></div>
     </div>
 
     <div class="divider"></div>
 
     <h2>Daftar Nasabah</h2>
-    <div class="muted">Klik “Buka” untuk lihat halaman publik nasabah, atau “Salin” untuk menyalin tautan.</div>
+    <div class="muted">Klik “Buka” untuk halaman publik (pakai ID), “Salin” untuk menyalin tautan.</div>
     <div class="table-wrap">
       <table id="tNasabah" class="table">
-        <thead><tr><th>Nama</th><th>Saldo</th><th>Aksi</th><th>Link</th></tr></thead>
+        <thead><tr><th>Nama</th><th>ID</th><th>Saldo</th><th>Aksi</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -60,10 +60,10 @@
       <input id="saldoBaru" placeholder="Saldo Awal" inputmode="numeric">
       <button id="btnTambah">Tambah Nasabah</button>
     </div>
+    <div class="muted small">ID dibuat otomatis & unik.</div>
 
     <h2>Edit Saldo (dengan Tanggal)</h2>
     <div class="row">
-      <!-- dropdown nama nasabah -->
       <select id="namaEditSel" title="Pilih Nasabah"></select>
       <input id="saldoEdit" placeholder="Jumlah" inputmode="numeric">
       <select id="aksiEdit" title="Jenis aksi">
@@ -76,7 +76,7 @@
       <input id="catatanEdit" placeholder="Catatan (opsional)" style="flex:1;min-width:220px">
       <button id="btnEdit">Simpan</button>
     </div>
-    <div class="muted small">Jika tanggal/jam kosong, sistem memakai waktu saat ini.</div>
+    <div class="muted small">Tarik > saldo otomatis ditolak. Koreksi + menambah lot, koreksi − mengurangi lot (FIFO).</div>
 
     <div class="divider"></div>
 
@@ -92,7 +92,7 @@
         <tbody></tbody>
       </table>
     </div>
-    <div class="muted small">Menghapus riwayat <em>tidak</em> mengubah saldo (hanya catatan).</div>
+    <div class="muted small">Menghapus riwayat <em>tidak</em> mengubah saldo/lots.</div>
 
     <div class="divider"></div>
 
@@ -104,28 +104,52 @@
     </div>
   </section>
 
-  <!-- HALAMAN PUBLIK: /?n=Nama (JS akan menampilkan ini pada mode publik) -->
-  <section id="public-view" class="card" style="display:none">
-    <div class="trust">
-      <strong>Lebih simpel dari bank</strong> — tanpa ribet, tanpa antre, dan gratis simpan setelah 1 bulan.
-      <br>Tarik kapan saja langsung ke <strong>Hepi Susanto</strong>, cair cepat via WhatsApp.
+  <!-- HALAMAN PUBLIK: /?id=XXXXXX -->
+  <section id="public-view" class="card glass" style="display:none">
+    <div class="trust glass-sm">
+      <strong>Lebih simpel dari bank</strong> — tanpa ribet, tanpa antre, gratis simpan ≥ 1 bulan.
+      <br>Tarik kapan saja ke <strong>Hepi Susanto</strong>, cair cepat via WhatsApp.
     </div>
 
     <h1 id="pv-title" class="mt16">Halo, ...</h1>
-    <p class="muted" id="pv-note">Tautan pribadi nasabah.</p>
 
-    <div class="stat big">
-      <small>Saldo Anda</small>
-      <h2 id="pv-saldo">Rp 0</h2>
+    <div class="grid2">
+      <div class="stat glass-sm">
+        <small>Saldo Total</small>
+        <h2 id="pv-saldo">Rp 0</h2>
+      </div>
+      <div class="stat glass-sm">
+        <small>Saldo Bisa Ditarik Gratis (≥ 30 hari)</small>
+        <h2 id="pv-free">Rp 0</h2>
+      </div>
     </div>
 
-    <div class="row">
+    <div class="stat glass-sm">
+      <small>Saldo Belum 30 Hari</small>
+      <h2 id="pv-locked">Rp 0</h2>
+    </div>
+
+    <div class="row mt16">
       <input id="pv-amount" placeholder="Nominal (contoh 100.000)" inputmode="numeric">
-    </div>
-    <div class="row">
       <button id="pv-add">Tambah Tabungan</button>
       <button id="pv-withdraw" class="secondary">Tarik Tabungan</button>
     </div>
+    <div id="pv-fee" class="muted small"></div>
+
+    <div class="divider"></div>
+    <details class="glass-sm">
+      <summary><strong>Biaya Admin (jika tarik sebelum 30 hari)</strong></summary>
+      <ul class="fee-list">
+        <li>&lt; 350.000 → Rp 3.000</li>
+        <li>&lt; 600.000 → Rp 5.000</li>
+        <li>&lt; 800.000 → Rp 7.000</li>
+        <li>&lt; 2.000.000 → Rp 10.000</li>
+        <li>&lt; 5.500.000 → Rp 20.000</li>
+        <li>&lt; 6.500.000 → Rp 25.000</li>
+        <li>&lt; 15.000.000 → Rp 30.000</li>
+        <li>&gt; 15.000.000 → tambah Rp 2.000 per 1.000.000</li>
+      </ul>
+    </details>
 
     <div class="divider"></div>
     <h2>Riwayat Transaksi</h2>
@@ -136,9 +160,8 @@
         <tbody></tbody>
       </table>
     </div>
-    <div class="muted small">Riwayat bersifat informatif. Perubahan saldo resmi dilakukan oleh admin.</div>
   </section>
 
   <script src="/app.js"></script>
 </body>
-</html>
+  </html>
