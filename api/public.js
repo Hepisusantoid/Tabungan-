@@ -2,9 +2,8 @@ export default async function handler(req, res) {
   try {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { name } = req.query || {};
-    const q = (name || '').toString().trim();
-    if (!q) return res.status(400).json({ error: 'Missing ?name=' });
+    const qId = (req.query.id || '').toString().trim();
+    const qName = (req.query.name || req.query.n || '').toString().trim();
 
     const { JSONBIN_BASE, JSONBIN_BIN_ID, JSONBIN_MASTER_KEY } = process.env;
     if (!JSONBIN_BASE || !JSONBIN_BIN_ID || !JSONBIN_MASTER_KEY) {
@@ -17,11 +16,19 @@ export default async function handler(req, res) {
     if (!r.ok) return res.status(r.status).json({ error: 'JSONBIN_GET_NON_200', status: r.status, detail: json });
 
     const list = (json?.record?.nasabah || []).map(x => ({
+      id: x.id || null,
       nama: x.nama,
       saldo: Number(x.saldo || 0),
-      history: Array.isArray(x.history) ? x.history : [] // [{ts, type, amount, note}]
+      history: Array.isArray(x.history) ? x.history : [],
+      lots: Array.isArray(x.lots) ? x.lots : [] // [{ts, amount, remaining}]
     }));
-    const found = list.find(x => (x.nama || '').toLowerCase() === q.toLowerCase());
+
+    let found = null;
+    if (qId) {
+      found = list.find(x => (x.id || '').toLowerCase() === qId.toLowerCase());
+    } else if (qName) {
+      found = list.find(x => (x.nama || '').toLowerCase() === qName.toLowerCase());
+    }
     if (!found) return res.status(404).json({ found: false, message: 'Nasabah tidak ditemukan' });
 
     return res.status(200).json({ found: true, nasabah: found });
