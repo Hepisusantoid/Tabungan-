@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="aurora">
-  <!-- NAV (disembunyikan di link publik) -->
+  <!-- NAV (hilang otomatis di link publik) -->
   <header class="topbar glass" id="topbar">
     <nav class="nav">
       <a href="#" data-tab="beranda" class="chip active">Beranda</a>
@@ -27,7 +27,7 @@
     <p id="loginMsg" class="muted"></p>
   </section>
 
-  <!-- DASHBOARD / ADMIN -->
+  <!-- ADMIN -->
   <section id="dashboard" class="card glass tab beranda-tab" style="display:none">
     <div class="row between">
       <h1>Dashboard Tabungan</h1>
@@ -66,23 +66,40 @@
     <div class="row">
       <select id="namaEditSel" title="Pilih Nasabah"></select>
       <input id="saldoEdit" placeholder="Jumlah" inputmode="numeric">
-      <select id="aksiEdit" title="Jenis aksi">
+      <select id="aksiEdit">
         <option value="tambah">Tambah Saldo</option>
         <option value="kurangi">Tarik Saldo</option>
         <option value="koreksi">Koreksi (Penyesuaian)</option>
       </select>
-      <input id="tglEdit" type="date" title="Tanggal (opsional)">
-      <input id="jamEdit" type="time" step="60" title="Jam (opsional)">
+      <input id="tglEdit" type="date">
+      <input id="jamEdit" type="time" step="60">
       <input id="catatanEdit" placeholder="Catatan (opsional)" style="flex:1;min-width:220px">
       <button id="btnEdit">Simpan</button>
     </div>
-    <div class="muted small">Tarik > saldo otomatis ditolak. Koreksi + menambah lot, koreksi − mengurangi lot (FIFO).</div>
+
+    <div class="divider"></div>
+
+    <h2>Persentase Kepemilikan</h2>
+    <div class="row">
+      <svg id="adm-pie" class="donut glass-sm" width="320" height="320" viewBox="0 0 100 100"></svg>
+      <div id="adm-legend" class="legend"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <h2>Pembagian Penghasilan</h2>
+    <p class="muted small">Penghasilan dibagi proporsional terhadap saldo saat ini. Masuk ke <b>bonus</b> setiap nasabah (saldo utama tidak berubah).</p>
+    <div class="row">
+      <input id="incomeAmount" placeholder="Nominal Penghasilan (contoh 1.000.000)" inputmode="numeric">
+      <button id="btnDistribute">Distribusikan</button>
+    </div>
+    <div id="incomeInfo" class="muted small"></div>
 
     <div class="divider"></div>
 
     <h2>Kelola Riwayat Transaksi</h2>
     <div class="row">
-      <select id="riwNama" title="Pilih Nasabah"></select>
+      <select id="riwNama"></select>
       <button id="riwRefresh" class="secondary small">Muat Riwayat</button>
     </div>
     <div id="riwEmpty" class="muted" style="display:none">Belum ada riwayat.</div>
@@ -92,19 +109,18 @@
         <tbody></tbody>
       </table>
     </div>
-    <div class="muted small">Menghapus riwayat <em>tidak</em> mengubah saldo/lots.</div>
 
     <div class="divider"></div>
 
     <h2>Edit Nama Nasabah</h2>
     <div class="row">
-      <select id="oldNameSel" title="Nama Lama"></select>
+      <select id="oldNameSel"></select>
       <input id="newName" placeholder="Nama Baru">
       <button id="btnRename">Ubah Nama</button>
     </div>
   </section>
 
-  <!-- HALAMAN PUBLIK: /?id=XXXXXX -->
+  <!-- HALAMAN PUBLIK -->
   <section id="public-view" class="card glass" style="display:none">
     <div class="trust glass-sm">
       <strong>Lebih simpel dari bank</strong> — tanpa ribet, tanpa antre, gratis simpan ≥ 1 bulan.
@@ -119,14 +135,20 @@
         <h2 id="pv-saldo">Rp 0</h2>
       </div>
       <div class="stat glass-sm">
-        <small>Saldo Bisa Ditarik Gratis (≥ 30 hari)</small>
-        <h2 id="pv-free">Rp 0</h2>
+        <small>Saldo Bonus</small>
+        <h2 id="pv-bonus">Rp 0</h2>
       </div>
     </div>
 
-    <div class="stat glass-sm">
-      <small>Saldo Belum 30 Hari</small>
-      <h2 id="pv-locked">Rp 0</h2>
+    <div class="grid2">
+      <div class="stat glass-sm">
+        <small>Bisa Ditarik Gratis (≥ 30 hari)</small>
+        <h2 id="pv-free">Rp 0</h2>
+      </div>
+      <div class="stat glass-sm">
+        <small>Belum 30 Hari</small>
+        <h2 id="pv-locked">Rp 0</h2>
+      </div>
     </div>
 
     <div class="row mt16">
@@ -137,19 +159,12 @@
     <div id="pv-fee" class="muted small"></div>
 
     <div class="divider"></div>
-    <details class="glass-sm">
-      <summary><strong>Biaya Admin (jika tarik sebelum 30 hari)</strong></summary>
-      <ul class="fee-list">
-        <li>&lt; 350.000 → Rp 3.000</li>
-        <li>&lt; 600.000 → Rp 5.000</li>
-        <li>&lt; 800.000 → Rp 7.000</li>
-        <li>&lt; 2.000.000 → Rp 10.000</li>
-        <li>&lt; 5.500.000 → Rp 20.000</li>
-        <li>&lt; 6.500.000 → Rp 25.000</li>
-        <li>&lt; 15.000.000 → Rp 30.000</li>
-        <li>&gt; 15.000.000 → tambah Rp 2.000 per 1.000.000</li>
-      </ul>
-    </details>
+
+    <h2>Porsi Anda</h2>
+    <div class="row">
+      <svg id="pv-pie" class="donut glass-sm" width="240" height="240" viewBox="0 0 100 100"></svg>
+      <div id="pv-legend" class="legend"></div>
+    </div>
 
     <div class="divider"></div>
     <h2>Riwayat Transaksi</h2>
