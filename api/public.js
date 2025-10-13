@@ -19,8 +19,9 @@ export default async function handler(req, res) {
       id: x.id || null,
       nama: x.nama,
       saldo: Number(x.saldo || 0),
+      bonus: Number(x.bonus || 0),
       history: Array.isArray(x.history) ? x.history : [],
-      lots: Array.isArray(x.lots) ? x.lots : [] // [{ts, amount, remaining}]
+      lots: Array.isArray(x.lots) ? x.lots : []
     }));
 
     let found = null;
@@ -31,7 +32,13 @@ export default async function handler(req, res) {
     }
     if (!found) return res.status(404).json({ found: false, message: 'Nasabah tidak ditemukan' });
 
-    return res.status(200).json({ found: true, nasabah: found });
+    const totalSaldo = list.reduce((s,n)=> s + Number(n.saldo||0), 0);
+
+    return res.status(200).json({
+      found: true,
+      nasabah: found,
+      totals: { saldo: totalSaldo, count: list.length }
+    });
   } catch (e) {
     return res.status(500).json({ error: 'FETCH_THROWN', message: e?.message || String(e) });
   }
