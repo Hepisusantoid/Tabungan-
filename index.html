@@ -56,14 +56,15 @@
 
     <div class="divider"></div>
 
-    <h2>Form Penghasilan & Pembagian Bonus</h2>
+    <h2>Form Penghasilan & Pembagian <u>Dividen</u></h2>
     <div class="row">
       <input id="revAmount" placeholder="Nominal penghasilan (contoh 1.000.000)" inputmode="numeric">
       <button id="revDistribute">Bagi ke Semua</button>
     </div>
     <div class="muted small">
-      Penghasilan dibagi proporsional berdasarkan % saldo pokok (tanpa bonus).
-      Hasil pembagian ditambahkan ke <b>bonus</b> tiap nasabah serta dicatat di riwayat.
+      Penghasilan dibagi proporsional berdasarkan % <b>saldo pokok</b> saat ini.
+      Hasilnya masuk ke <b>Saldo Dividen</b> tiap nasabah serta dicatat di riwayat (type: <i>dividen</i>).
+      Dividen tidak mengubah lots/saldo pokok.
     </div>
 
     <div class="divider"></div>
@@ -71,7 +72,7 @@
     <h2>Daftar Nasabah</h2>
     <div class="table-wrap">
       <table id="tNasabah" class="table">
-        <thead><tr><th>Nama</th><th>ID</th><th>Saldo</th><th>Bonus</th><th>Aksi</th></tr></thead>
+        <thead><tr><th>Nama</th><th>ID</th><th>Saldo</th><th>Dividen</th><th>Aksi</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -137,7 +138,7 @@
 
     <div class="grid2">
       <div class="stat glass-sm"><small>Saldo Total</small><h2 id="pv-saldo">Rp 0</h2></div>
-      <div class="stat glass-sm"><small>Saldo Bonus</small><h2 id="pv-bonus">Rp 0</h2></div>
+      <div class="stat glass-sm"><small>Saldo <u>Dividen</u></small><h2 id="pv-dividen">Rp 0</h2></div>
     </div>
 
     <div class="grid2">
@@ -186,4 +187,4 @@
 
   <script src="/app.js"></script>
 </body>
-                                                                                        </html>
+  </html>
