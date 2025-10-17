@@ -4,7 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TabunganKu</title>
-  <link rel="stylesheet" href="/style.css">
+
+  <!-- cegah cache HTML -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <!-- cache-busting: ganti versi kalau update -->
+  <link rel="stylesheet" href="/style.css?v=2025-10-14a">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -62,7 +70,7 @@
       <button id="revDistribute">Bagi ke Semua</button>
     </div>
     <div class="muted small">
-      Penghasilan dibagi proporsional berdasarkan % <b>saldo pokok</b> saat ini.
+      Penghasilan dibagi proporsional berdasarkan % <b>saldo pokok</b>.
       Hasilnya masuk ke <b>Saldo Dividen</b> tiap nasabah serta dicatat di riwayat (type: <i>dividen</i>).
       Dividen tidak mengubah lots/saldo pokok.
     </div>
@@ -185,6 +193,7 @@
     </div>
   </section>
 
-  <script src="/app.js"></script>
+  <!-- cache-busting juga untuk JS -->
+  <script src="/app.js?v=2025-10-14a"></script>
 </body>
-  </html>
+                                                  </html>
