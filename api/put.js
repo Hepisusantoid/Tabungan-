@@ -14,7 +14,6 @@ export default async function handler(req, res) {
     try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); }
     catch { body = {}; }
 
-    // Simpan seluruh dokumen (schema: { nasabah: [...] })
     const url = `${JSONBIN_BASE}/b/${JSONBIN_BIN_ID}`;
     const r = await fetch(url, {
       method: 'PUT',
