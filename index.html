@@ -4,17 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TabunganKu</title>
-
-  <!-- cegah cache HTML -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
-  <!-- cache-busting: ganti versi kalau update -->
-  <link rel="stylesheet" href="/style.css?v=2025-10-14a">
-  <link rel="stylesheet" href="/style.css?v=2025-10-17c">
-<script src="/app.js?v=2025-10-17c"></script>
-
+  <link rel="stylesheet" href="/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -25,7 +15,6 @@
   </style>
 </head>
 <body class="aurora">
-  <!-- NAV -->
   <header class="topbar glass" id="topbar">
     <nav class="nav">
       <a href="#" data-tab="beranda" class="chip active">Beranda</a>
@@ -43,7 +32,7 @@
     <p id="loginMsg" class="muted"></p>
   </section>
 
-  <!-- DASHBOARD / ADMIN -->
+  <!-- ADMIN -->
   <section id="dashboard" class="card glass tab beranda-tab" style="display:none">
     <div class="row between">
       <h1>Dashboard Tabungan</h1>
@@ -72,9 +61,7 @@
       <button id="revDistribute">Bagi ke Semua</button>
     </div>
     <div class="muted small">
-      Penghasilan dibagi proporsional berdasarkan % <b>saldo pokok</b>.
-      Hasilnya masuk ke <b>Saldo Dividen</b> tiap nasabah serta dicatat di riwayat (type: <i>dividen</i>).
-      Dividen tidak mengubah lots/saldo pokok.
+      Penghasilan dibagi proporsional berdasar % <b>saldo pokok</b>. Masuk ke <b>Saldo Dividen</b> + riwayat (type: <i>dividen</i>).
     </div>
 
     <div class="divider"></div>
@@ -195,7 +182,6 @@
     </div>
   </section>
 
-  <!-- cache-busting juga untuk JS -->
-  <script src="/app.js?v=2025-10-14a"></script>
+  <script src="/app.js"></script>
 </body>
-                                                  </html>
+</html>
