@@ -71,3 +71,6 @@ h1,h2{margin:6px 0 8px 0}
   input,select{min-width:unset;flex:1}
   .table{min-width:640px}
 }
+
+/* pastikan canvas punya lebar */
+canvas.chart{ display:block; }
