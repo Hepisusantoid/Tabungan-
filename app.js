@@ -1,4 +1,4 @@
-/***** ====== APP.JS (FINAL) ====== *****/
+/***** ====== APP.JS (DONUT + LEGEND + EDIT DIVIDEN + UI NASABAH RINGKAS) ====== *****/
 
 // Elements
 const els = {
@@ -26,6 +26,15 @@ const els = {
   catatanEdit: document.getElementById('catatanEdit'),
   btnEdit: document.getElementById('btnEdit'),
 
+  // edit dividen
+  divNamaSel: document.getElementById('divNamaSel'),
+  divJumlah: document.getElementById('divJumlah'),
+  divAksi: document.getElementById('divAksi'),
+  divTgl: document.getElementById('divTgl'),
+  divJam: document.getElementById('divJam'),
+  divCatatan: document.getElementById('divCatatan'),
+  divBtn: document.getElementById('divBtn'),
+
   riwNama: document.getElementById('riwNama'),
   riwRefresh: document.getElementById('riwRefresh'),
   riwTableBody: document.querySelector('#riwTable tbody'),
@@ -48,7 +57,6 @@ const els = {
   pvSaldo: document.getElementById('pv-saldo'),
   pvDividen: document.getElementById('pv-dividen'),
   pvFree: document.getElementById('pv-free'),
-  pvLocked: document.getElementById('pv-locked'),
   pvAmount: document.getElementById('pv-amount'),
   pvAdd: document.getElementById('pv-add'),
   pvWithdraw: document.getElementById('pv-withdraw'),
@@ -56,10 +64,12 @@ const els = {
   pvEmpty: document.getElementById('pv-empty'),
   pvFee: document.getElementById('pv-fee'),
   pvPie: document.getElementById('pvPie'),
+  pvLegend: document.getElementById('pvLegend'),
   pvShareText: document.getElementById('pvShareText'),
 
-  // Charts
+  // Chart admin
   adminPie: document.getElementById('adminPie'),
+  adminLegend: document.getElementById('adminLegend'),
 };
 
 let state = { nasabah: [] };
@@ -75,7 +85,7 @@ const nfPlain   = new Intl.NumberFormat('id-ID', { maximumFractionDigits:0 });
 const fmt = n => nfRupiah.format(Number(n)||0);
 const fmtNum = n => nfPlain.format(Number(n)||0);
 const parseNum = s => Number((s||'').toString().replace(/[^\d]/g,'')) || 0;
-['saldoBaru','saldoEdit','pv-amount','revAmount'].forEach(id=>{
+['saldoBaru','saldoEdit','pv-amount','revAmount','divJumlah'].forEach(id=>{
   const el=document.getElementById(id); if(!el) return;
   el.addEventListener('input',()=> el.value = fmtNum(parseNum(el.value)));
 });
@@ -88,11 +98,10 @@ async function callPublicByName(name){const r=await fetch('/api/public?name='+en
 
 // IDs & lots
 const genId=(exist=[])=>{const cs='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';do{s=[...Array(6)].map(()=>cs[Math.floor(Math.random()*cs.length)]).join('')}while(exist.includes(s));return s;};
-function ensureLots(n){ n.history=Array.isArray(n.history)?n.history:[]; n.lots=Array.isArray(n.lots)?n.lots:[]; if(n.lots.length===0){ let lots=[]; const sorted=[...n.history].sort((a,b)=>(a.ts||0)-(b.ts||0)); for(const h of sorted){const amt=Number(h.amount||0); if(h.type==='tambah'&&amt>0) lots.push({ts:h.ts||Date.now(),amount:amt,remaining:amt}); else if(h.type==='tarik'&&amt>0){let need=amt; for(const l of lots){if(need<=0)break;const take=Math.min(l.remaining,need);l.remaining-=take;need-=take;}} else if(h.type==='koreksi'){ if(amt>0) lots.push({ts:h.ts||Date.now(),amount:amt,remaining:amt}); else if(amt<0){let need=-amt; for(const l of lots){if(need<=0)break;const take=Math.min(l.remaining,need);l.remaining-=take;need-=take;}}} } n.lots=lots.filter(l=>l.remaining>0); if(n.lots.length===0&&Number(n.saldo||0)>0){n.lots=[{ts:Date.now(),amount:Number(n.saldo||0),remaining:Number(n.saldo||0)}];} } if(typeof n.dividen!=='number') n.dividen=0; return n; }
+function ensureLots(n){ n.history=Array.isArray(n.history)?n.history:[]; n.lots=Array.isArray(n.lots)?n.lots:[]; if(n.lots.length===0){ let lots=[]; const sorted=[...n.history].sort((a,b)=>(a.ts||0)-(b.ts||0)); for(const h of sorted){const amt=Number(h.amount||0); if(h.type==='tambah'&&amt>0) lots.push({ts:h.ts||Date.now(),amount:amt,remaining:amt}); else if(h.type==='tarik'&&amt>0){let need=amt; for(const l of lots){if(need<=0)break;const take=Math.min(l.remaining,need);l.remaining-=take;need-=take;}} else if(h.type==='koreksi'){ if(amt>0) lots.push({ts:h.ts||Date.now(),amount:amt,remaining:amt}); else if(amt<0){let need=-amt; for(const l of lots){if(need<=0)break;const take=Math.min(l.remaining,need);l.remaining-=take;need-=need;}}} } n.lots=lots.filter(l=>l.remaining>0); if(n.lots.length===0&&Number(n.saldo||0)>0){n.lots=[{ts:Date.now(),amount:Number(n.saldo||0),remaining:Number(n.saldo||0)}];} } if(typeof n.dividen!=='number') n.dividen=0; return n; }
 function lotsConsume(lots,amount){let need=amount;for(const l of lots){if(need<=0)break;const t=Math.min(l.remaining,need);l.remaining-=t;need-=t;}return lots.filter(l=>l.remaining>0);}
 function lotsAdd(lots,amount,ts){lots.push({ts,amount,remaining:amount});return lots;}
 const freeAmount=(n,now=Date.now())=>ensureLots(n).lots.reduce((s,l)=>s+(now-(l.ts||0)>=ONE_MONTH_MS?Number(l.remaining||0):0),0);
-const lockedAmount=(n,now=Date.now())=>ensureLots(n).lots.reduce((s,l)=>s+(now-(l.ts||0)< ONE_MONTH_MS?Number(l.remaining||0):0),0);
 
 // Admin fee
 function adminFee(x){const n=Number(x||0);if(n<=0)return 0;if(n<350000)return 3000;if(n<600000)return 5000;if(n<800000)return 7000;if(n<2000000)return 10000;if(n<5500000)return 20000;if(n<6500000)return 25000;if(n<15000000)return 30000;const extra=n-15000000;const blocks=Math.ceil(extra/1000000);return 30000+blocks*2000;}
@@ -102,32 +111,66 @@ const isLogged=()=>localStorage.getItem('tabungan_logged')==='1';
 const setLogged=v=>{v?localStorage.setItem('tabungan_logged','1'):localStorage.removeItem('tabungan_logged');renderGate();};
 function renderGate(){const ok=isLogged(); els.login.style.display=ok?'none':'block'; els.dash.style.display=ok?'block':'none'; if(ok) loadData();}
 
-// Charts (robust)
+// ===== CHART (DONUT) + LEGEND =====
 let lastAdminParts=null, lastPvParts=null;
-function drawPie(canvas,parts,colors){
+function drawDonut(canvas,parts,colors){
   if(!canvas) return;
   const rect=canvas.getBoundingClientRect();
   const baseW=Math.floor(rect.width||canvas.offsetWidth||320);
-  if(baseW===0){ setTimeout(()=>drawPie(canvas,parts,colors),120); return; }
+  if(baseW===0){ setTimeout(()=>drawDonut(canvas,parts,colors),120); return; }
   const dpr=Math.max(1,window.devicePixelRatio||1);
-  const baseH=Math.max(220,Math.floor(baseW*0.6));
+  const baseH=Math.max(220,Math.floor(baseW*0.625));
   canvas.width=baseW*dpr; canvas.height=baseH*dpr;
   const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   const W=baseW,H=baseH; ctx.clearRect(0,0,W,H);
-  const cx=W/2,cy=H/2,r=Math.min(W,H)/2-16; const total=parts.reduce((s,p)=>s+p.value,0)||1;
-  let start=-Math.PI/2;
-  parts.forEach((p,i)=>{const ang=(p.value/total)*Math.PI*2;const g=ctx.createLinearGradient(0,0,W,H);const c=colors[i%colors.length];g.addColorStop(0,c);g.addColorStop(1,c+'aa');ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,start,start+ang);ctx.closePath();ctx.fillStyle=g;ctx.fill();start+=ang;});
-  const legendY=H-18;const step=Math.min(180,W/(parts.length+1));ctx.font='700 14px Inter, system-ui';ctx.fillStyle='#dff7e6';
-  parts.forEach((p,i)=>{const pct=Math.round((p.value/total)*100);ctx.fillText(`${p.label} ${pct}%`,12+i*step,legendY);});
-}
-window.addEventListener('resize',()=>{ if(els.adminPie&&lastAdminParts) drawPie(els.adminPie,lastAdminParts,['#46d07d','#25b767','#1a8f4e','#5be39b','#2ab57a','#3dd28f','#1fa35a','#6ee8aa','#297c55']); if(els.pvPie&&lastPvParts) drawPie(els.pvPie,lastPvParts,['#46d07d','#2b3e33']); });
 
-// Admin helpers
-function refreshNameLists(){const rows=(state.nasabah||[]).map(x=>({label:`${x.nama} — ${x.id}`,value:x.id})).sort((a,b)=>a.label.localeCompare(b.label,'id')); const fill=sel=>{if(!sel)return; sel.innerHTML=rows.map(r=>`<option value="${r.value}">${r.label}</option>`).join('');}; fill(els.namaEditSel); fill(els.riwNama); fill(els.oldNameSel);}
+  const cx=W/2,cy=H/2;
+  const r=Math.min(W,H)/2-14;
+  const inner=r*0.58; // donut thickness
+
+  const total=parts.reduce((s,p)=>s+p.value,0)||1;
+  let start=-Math.PI/2;
+  parts.forEach((p,i)=>{
+    const ang=(p.value/total)*Math.PI*2;
+    const c=colors[i%colors.length];
+    // slice
+    ctx.beginPath();
+    ctx.arc(cx,cy,r,start,start+ang);
+    ctx.arc(cx,cy,inner,start+ang,start,true);
+    ctx.closePath();
+    const g=ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,c); g.addColorStop(1,c+'aa');
+    ctx.fillStyle=g;
+    ctx.fill();
+    start+=ang;
+  });
+}
+function renderLegend(container,parts,colors){
+  if(!container) return;
+  const total=parts.reduce((s,p)=>s+p.value,0)||1;
+  container.innerHTML = parts.map((p,i)=>{
+    const pct = Math.round((p.value/total)*100);
+    return `<div class="item"><span class="dot" style="background:${colors[i%colors.length]}"></span><span>${p.label} — ${pct}%</span></div>`;
+  }).join('');
+}
+window.addEventListener('resize',()=>{
+  if(els.adminPie&&lastAdminParts){ drawDonut(els.adminPie,lastAdminParts,PALETTE); }
+  if(els.pvPie&&lastPvParts){ drawDonut(els.pvPie,lastPvParts,PALETTE_PV); }
+});
+
+const PALETTE = ['#46d07d','#25b767','#1a8f4e','#5be39b','#2ab57a','#3dd28f','#1fa35a','#6ee8aa','#297c55'];
+const PALETTE_PV = ['#46d07d','#2b3e33'];
+
+// ===== ADMIN HELPERS =====
+function refreshNameLists(){
+  const rows=(state.nasabah||[]).map(x=>({label:`${x.nama} — ${x.id}`,value:x.id})).sort((a,b)=>a.label.localeCompare(b.label,'id'));
+  const fill=sel=>{if(!sel)return; sel.innerHTML=rows.map(r=>`<option value="${r.value}">${r.label}</option>`).join('');};
+  fill(els.namaEditSel); fill(els.riwNama); fill(els.oldNameSel); fill(els.divNamaSel);
+}
 const indexById=id=>(state.nasabah||[]).findIndex(x=>x.id===id);
 const findById=id=>(state.nasabah||[]).find(x=>x.id===id);
 
-// Render admin
+// ===== RENDER ADMIN =====
 function renderAdmin(){
   refreshNameLists();
   const list=state.nasabah||[]; let total=0; list.forEach(x=> total+=Number(x.saldo||0));
@@ -160,7 +203,7 @@ function renderAdmin(){
     try{await callPut(state); renderAdmin();}catch(e){alert(e.message);}
   }));
 
-  // Admin pie (top 8 + lainnya)
+  // Admin donut + legend (top 8 + lainnya)
   if (els.adminPie) {
     const sorted=[...list].sort((a,b)=>Number(b.saldo||0)-Number(a.saldo||0));
     const top=sorted.slice(0,8);
@@ -168,11 +211,12 @@ function renderAdmin(){
     const parts=top.map(n=>({label:n.nama.split(' ')[0], value:Number(n.saldo||0)}));
     if(others>0) parts.push({label:'Lainnya', value:others});
     lastAdminParts = parts.length?parts:[{label:'Kosong', value:1}];
-    drawPie(els.adminPie, lastAdminParts, ['#46d07d','#25b767','#1a8f4e','#5be39b','#2ab57a','#3dd28f','#1fa35a','#6ee8aa','#297c55']);
+    drawDonut(els.adminPie,lastAdminParts,PALETTE);
+    renderLegend(els.adminLegend,lastAdminParts,PALETTE);
   }
 }
 
-// Load data + migrate
+// ===== LOAD DATA (+migrasi) =====
 async function loadData(){
   try{
     const data=await callGet();
@@ -183,11 +227,8 @@ async function loadData(){
       let n={...x};
       if(!n.id){ n.id=genId([...ids]); changed=true; }
       ids.add(n.id);
-
-      // migrate bonus -> dividen (kalau dataset lama)
       if (typeof n.dividen!=='number') n.dividen=0;
       if (typeof n.bonus==='number' && n.bonus>0){ n.dividen += n.bonus; n.bonus = 0; changed=true; }
-
       ensureLots(n);
       return n;
     });
@@ -197,30 +238,30 @@ async function loadData(){
   }catch(e){ els.msg.textContent='GET error → '+e.message; }
 }
 
-// Add nasabah
+// ===== TAMBAH NASABAH =====
 els.btnTambah?.addEventListener('click', async ()=>{
   const nama=(els.namaBaru.value||'').trim();
   const saldo=parseNum(els.saldoBaru.value);
   if(!nama){alert('Nama wajib');return;}
   const exist=(state.nasabah||[]).some(x=>(x.nama||'').toLowerCase()===nama.toLowerCase());
   if(exist){alert('Nama sudah ada');return;}
-
   const id=genId((state.nasabah||[]).map(x=>x.id));
   const now=Date.now();
   const history = saldo>0 ? [{ ts:now, type:'tambah', amount:saldo, note:'Setoran awal' }] : [];
   const lots    = saldo>0 ? [{ ts:now, amount:saldo, remaining:saldo }] : [];
-
   state.nasabah=[...(state.nasabah||[]), { id, nama, saldo, dividen:0, history, lots }];
   try{ await callPut(state); els.namaBaru.value=''; els.saldoBaru.value=''; renderAdmin(); }
   catch(e){ alert(e.message); }
 });
 
-// Edit saldo
+// ===== UTIL =====
 function buildTs(d,t){ if(!d&&!t) return Date.now();
   const [Y,M,D]=(d||'').split('-').map(v=>parseInt(v,10));
   const [h,m]=(t||'').split(':').map(v=>parseInt(v,10));
   return new Date(isFinite(Y)?Y:new Date().getFullYear(), isFinite(M)?M-1:new Date().getMonth(), isFinite(D)?D:new Date().getDate(), isFinite(h)?h:9, isFinite(m)?m:0, 0,0).getTime();
 }
+
+// ===== EDIT SALDO =====
 els.btnEdit?.addEventListener('click', async ()=>{
   const id=els.namaEditSel.value;
   const jumlah=parseNum(els.saldoEdit.value);
@@ -254,7 +295,33 @@ els.btnEdit?.addEventListener('click', async ()=>{
   }catch(e){ alert(e.message); }
 });
 
-// History admin
+// ===== EDIT DIVIDEN =====
+els.divBtn?.addEventListener('click', async ()=>{
+  const id=els.divNamaSel.value;
+  const jumlah=parseNum(els.divJumlah.value);
+  const mode=els.divAksi.value; // tambah / kurangi
+  const ts = buildTs(els.divTgl.value, els.divJam.value);
+  const note=(els.divCatatan.value||'').trim() || (mode==='tambah'?'Penambahan dividen':'Penarikan dividen');
+
+  if(!id||!jumlah){ alert('Pilih nasabah & isi jumlah'); return; }
+  const idx=indexById(id); if(idx<0){ alert('Nasabah tidak ditemukan'); return; }
+
+  const n={...state.nasabah[idx]};
+  let delta = mode==='tambah' ? jumlah : -jumlah;
+  if (mode==='kurangi' && jumlah>Number(n.dividen||0)) { alert('Lebih besar dari dividen saat ini.'); return; }
+
+  n.dividen = Math.max(0, Number(n.dividen||0) + delta);
+  n.history = [...(n.history||[]), { ts, type:'dividen', amount:Math.abs(jumlah), note }];
+
+  state.nasabah[idx]=n;
+  try{
+    await callPut(state);
+    els.divJumlah.value=''; els.divCatatan.value=''; els.divTgl.value=''; els.divJam.value='';
+    renderAdmin(); if(els.riwNama.value===id) renderHistoryAdmin(id);
+  }catch(e){ alert(e.message); }
+});
+
+// ===== HISTORY ADMIN =====
 function renderHistoryAdmin(id){
   const n=findById(id);
   els.riwTableBody.innerHTML='';
@@ -268,7 +335,7 @@ function renderHistoryAdmin(id){
     const d=new Date(it.ts||Date.now());
     const tgl=d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});
     let jenis=(it.type||'koreksi').toLowerCase();
-    if (jenis==='bonus') jenis='dividen'; // normalisasi dataset lama
+    if (jenis==='bonus') jenis='dividen';
     const cls = jenis==='tambah'?'add': jenis==='tarik'?'withdraw': jenis==='dividen'?'add':'koreksi';
     const tr=document.createElement('tr');
     tr.innerHTML = `<td>${row+1}</td><td>${tgl}</td><td><span class="badge ${cls}">${jenis[0].toUpperCase()+jenis.slice(1)}</span></td><td>${fmt(it.amount||0)}</td><td>${it.note||'-'}</td><td><button class="danger small" data-del="${it._i}" data-id="${n.id}">Hapus</button></td>`;
@@ -291,22 +358,7 @@ function renderHistoryAdmin(id){
 els.riwRefresh?.addEventListener('click', ()=> renderHistoryAdmin(els.riwNama.value));
 els.riwNama?.addEventListener('change', ()=> renderHistoryAdmin(els.riwNama.value));
 
-// Rename
-els.btnRename?.addEventListener('click', async ()=>{
-  const id=els.oldNameSel.value;
-  const newN=(els.newName.value||'').trim();
-  if(!id||!newN){ alert('Pilih nama & isi nama baru'); return; }
-  const idx=indexById(id); if(idx<0){ alert('Nasabah tidak ditemukan'); return; }
-  state.nasabah[idx]={...state.nasabah[idx], nama:newN};
-  try{
-    await callPut(state);
-    els.newName.value=''; renderAdmin();
-    if (els.riwNama.value===id) renderHistoryAdmin(id);
-    alert('Nama diubah');
-  }catch(e){ alert(e.message); }
-});
-
-// Revenue share → DIVIDEN
+// ===== REVENUE SHARE → DIVIDEN =====
 els.revDistribute?.addEventListener('click', async ()=>{
   const totalIncome=parseNum(els.revAmount.value);
   if(!totalIncome){ alert('Isi nominal penghasilan'); return; }
@@ -331,18 +383,17 @@ els.revDistribute?.addEventListener('click', async ()=>{
   }catch(e){ alert(e.message); }
 });
 
-// Public view
+// ===== PUBLIC VIEW =====
 function renderPublicHistory(list){
   els.pvHistory.innerHTML='';
   if(!Array.isArray(list)||list.length===0){ els.pvEmpty.style.display='block'; return; }
   els.pvEmpty.style.display='none';
-
   const data=[...list].sort((a,b)=>(b.ts||0)-(a.ts||0));
   data.forEach(it=>{
     const d=new Date(it.ts||Date.now());
     const tgl=d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});
     let jenis=(it.type||'koreksi').toLowerCase();
-    if (jenis==='bonus') jenis='dividen'; // normalisasi
+    if (jenis==='bonus') jenis='dividen';
     const cls = jenis==='tambah'?'add': jenis==='tarik'?'withdraw': jenis==='dividen'?'add':'koreksi';
     const tr=document.createElement('tr');
     tr.innerHTML = `<td>${tgl}</td><td><span class="badge ${cls}">${jenis[0].toUpperCase()+jenis.slice(1)}</span></td><td>${fmt(it.amount||0)}</td><td>${it.note||'-'}</td>`;
@@ -353,16 +404,15 @@ function drawPublicPie(nama, share){
   const you = Math.round(share);
   const other = Math.max(0, 100 - you);
   lastPvParts = [{label:nama.split(' ')[0], value:you},{label:'Lainnya', value:other}];
-  drawPie(els.pvPie, lastPvParts, ['#46d07d','#2b3e33']);
+  drawDonut(els.pvPie,lastPvParts,PALETTE_PV);
+  renderLegend(els.pvLegend,lastPvParts,PALETTE_PV);
   els.pvShareText.textContent = `${nama} ${you}% vs Lainnya ${other}%`;
 }
 function updatePublicStats(nas, totalAll){
   const free = freeAmount(nas);
-  const locked = lockedAmount(nas);
   els.pvSaldo.textContent   = fmt(nas.saldo||0);
   els.pvDividen.textContent = fmt(nas.dividen||0);
   els.pvFree.textContent    = fmt(free);
-  els.pvLocked.textContent  = fmt(locked);
 
   const share = totalAll>0 ? (Number(nas.saldo||0)/totalAll)*100 : 0;
   drawPublicPie(nas.nama, share);
@@ -377,7 +427,6 @@ function updatePublicStats(nas, totalAll){
 async function loadPublicById(id){
   try{
     const nas = await callPublicById(id); ensureLots(nas);
-    // jika dataset lama masih punya bonus
     if (typeof nas.dividen!=='number') nas.dividen=0;
     if (typeof nas.bonus==='number' && nas.bonus>0){ nas.dividen+=nas.bonus; nas.bonus=0; }
 
@@ -417,7 +466,7 @@ async function loadPublicById(id){
 }
 async function loadPublicByName(name){ const nas=await callPublicByName(name); location.replace(`/?id=${encodeURIComponent(nas.id)}`); }
 
-// Login
+// ===== LOGIN =====
 els.btnLogin?.addEventListener('click', async ()=>{
   const u=document.getElementById('user').value.trim();
   const p=document.getElementById('pass').value.trim();
@@ -430,7 +479,7 @@ els.btnLogin?.addEventListener('click', async ()=>{
 });
 els.btnLogout?.addEventListener('click', ()=> setLogged(false));
 
-// Router
+// ===== ROUTER =====
 if (qId || qName) {
   if (els.topbar) els.topbar.style.display='none';
   document.querySelectorAll('.tab').forEach(el=> el.style.display='none');
@@ -438,4 +487,4 @@ if (qId || qName) {
   (qId ? loadPublicById(qId) : loadPublicByName(qName));
 } else {
   renderGate();
-  }
+                                   }
