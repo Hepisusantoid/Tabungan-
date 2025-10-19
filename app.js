@@ -1,4 +1,4 @@
-/***** ====== APP.JS (FULL) ====== *****/
+/***** ====== APP.JS (FINAL) ====== *****/
 
 // Elements
 const els = {
@@ -184,7 +184,7 @@ async function loadData(){
       if(!n.id){ n.id=genId([...ids]); changed=true; }
       ids.add(n.id);
 
-      // migrate bonus -> dividen
+      // migrate bonus -> dividen (kalau dataset lama)
       if (typeof n.dividen!=='number') n.dividen=0;
       if (typeof n.bonus==='number' && n.bonus>0){ n.dividen += n.bonus; n.bonus = 0; changed=true; }
 
@@ -267,9 +267,8 @@ function renderHistoryAdmin(id){
   data.forEach((it,row)=>{
     const d=new Date(it.ts||Date.now());
     const tgl=d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});
-    // normalisasi label bonus -> Dividen
     let jenis=(it.type||'koreksi').toLowerCase();
-    if (jenis==='bonus') jenis='dividen';
+    if (jenis==='bonus') jenis='dividen'; // normalisasi dataset lama
     const cls = jenis==='tambah'?'add': jenis==='tarik'?'withdraw': jenis==='dividen'?'add':'koreksi';
     const tr=document.createElement('tr');
     tr.innerHTML = `<td>${row+1}</td><td>${tgl}</td><td><span class="badge ${cls}">${jenis[0].toUpperCase()+jenis.slice(1)}</span></td><td>${fmt(it.amount||0)}</td><td>${it.note||'-'}</td><td><button class="danger small" data-del="${it._i}" data-id="${n.id}">Hapus</button></td>`;
@@ -343,7 +342,7 @@ function renderPublicHistory(list){
     const d=new Date(it.ts||Date.now());
     const tgl=d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});
     let jenis=(it.type||'koreksi').toLowerCase();
-    if (jenis==='bonus') jenis='dividen'; // normalisasi tampilan
+    if (jenis==='bonus') jenis='dividen'; // normalisasi
     const cls = jenis==='tambah'?'add': jenis==='tarik'?'withdraw': jenis==='dividen'?'add':'koreksi';
     const tr=document.createElement('tr');
     tr.innerHTML = `<td>${tgl}</td><td><span class="badge ${cls}">${jenis[0].toUpperCase()+jenis.slice(1)}</span></td><td>${fmt(it.amount||0)}</td><td>${it.note||'-'}</td>`;
@@ -378,7 +377,7 @@ function updatePublicStats(nas, totalAll){
 async function loadPublicById(id){
   try{
     const nas = await callPublicById(id); ensureLots(nas);
-    // migrasi ringan sisi klien jika masih ada bonus
+    // jika dataset lama masih punya bonus
     if (typeof nas.dividen!=='number') nas.dividen=0;
     if (typeof nas.bonus==='number' && nas.bonus>0){ nas.dividen+=nas.bonus; nas.bonus=0; }
 
@@ -439,4 +438,4 @@ if (qId || qName) {
   (qId ? loadPublicById(qId) : loadPublicByName(qName));
 } else {
   renderGate();
-}
+  }
