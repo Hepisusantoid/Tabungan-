@@ -45,6 +45,7 @@ td:last-child, th:last-child{white-space:normal}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:10px 0 16px}
 .stat{padding:12px}
 .stat h2{margin:6px 0 0 0}
+.stat.big{padding:16px;border:1px solid rgba(140,255,180,.2);box-shadow:0 10px 40px rgba(20,120,60,.25);margin-top:8px}
 
 h1,h2{margin:6px 0 8px 0}
 .muted{color:var(--muted)}
@@ -62,6 +63,22 @@ h1,h2{margin:6px 0 8px 0}
 
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
+/* Chips row (halaman nasabah) */
+.chips-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.chip-stat{background:rgba(18,26,20,.45);border:1px solid rgba(140,255,180,.13);backdrop-filter:blur(6px);border-radius:12px;padding:10px 12px;min-width:180px}
+.chip-stat small{display:block;color:var(--muted);margin-bottom:4px}
+.chip-stat div{font-weight:700}
+
+/* Chart */
+.chart-wrap{display:flex;justify-content:center;align-items:center;width:100%;overflow:hidden}
+canvas.chart{max-width:720px;width:100%;height:auto;aspect-ratio:1.6/1;border-radius:12px;display:block}
+
+/* Legend */
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 4px}
+.legend.small{grid-template-columns:1fr}
+.legend .item{display:flex;gap:8px;align-items:center}
+.legend .dot{width:10px;height:10px;border-radius:50%}
+
 .fee-list{margin:8px 0 0 18px;line-height:1.8}
 
 @media (max-width: 720px){
@@ -70,7 +87,5 @@ h1,h2{margin:6px 0 8px 0}
   .grid2{grid-template-columns:1fr}
   input,select{min-width:unset;flex:1}
   .table{min-width:640px}
+  .legend{grid-template-columns:1fr}
 }
-
-/* pastikan canvas punya lebar */
-canvas.chart{ display:block; }
