@@ -7,14 +7,9 @@
   <link rel="stylesheet" href="/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    .chart-wrap{display:flex;justify-content:center;align-items:center;width:100%;overflow:hidden}
-    canvas.chart{max-width:720px;width:100%;height:auto;aspect-ratio:2/1;border-radius:12px;display:block}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:720px){ .grid2{grid-template-columns:1fr} }
-  </style>
 </head>
 <body class="aurora">
+  <!-- NAV -->
   <header class="topbar glass" id="topbar">
     <nav class="nav">
       <a href="#" data-tab="beranda" class="chip active">Beranda</a>
@@ -32,7 +27,7 @@
     <p id="loginMsg" class="muted"></p>
   </section>
 
-  <!-- ADMIN -->
+  <!-- DASHBOARD / ADMIN -->
   <section id="dashboard" class="card glass tab beranda-tab" style="display:none">
     <div class="row between">
       <h1>Dashboard Tabungan</h1>
@@ -52,6 +47,7 @@
     <div class="chart-wrap glass-sm" style="padding:8px">
       <canvas id="adminPie" class="chart"></canvas>
     </div>
+    <div id="adminLegend" class="legend"></div>
 
     <div class="divider"></div>
 
@@ -101,6 +97,22 @@
 
     <div class="divider"></div>
 
+    <h2>Edit <u>Dividen</u> Nasabah</h2>
+    <div class="row">
+      <select id="divNamaSel" title="Pilih Nasabah"></select>
+      <input id="divJumlah" placeholder="Jumlah" inputmode="numeric">
+      <select id="divAksi" title="Jenis aksi">
+        <option value="tambah">Tambah Dividen</option>
+        <option value="kurangi">Kurangi / Tarik Dividen</option>
+      </select>
+      <input id="divTgl" type="date" title="Tanggal (opsional)">
+      <input id="divJam" type="time" step="60" title="Jam (opsional)">
+      <input id="divCatatan" placeholder="Catatan (opsional)" style="flex:1;min-width:220px">
+      <button id="divBtn">Simpan Dividen</button>
+    </div>
+
+    <div class="divider"></div>
+
     <h2>Kelola Riwayat Transaksi</h2>
     <div class="row">
       <select id="riwNama" title="Pilih Nasabah"></select>
@@ -133,20 +145,23 @@
 
     <h1 id="pv-title" class="mt16">Halo, ...</h1>
 
-    <div class="grid2">
-      <div class="stat glass-sm"><small>Saldo Total</small><h2 id="pv-saldo">Rp 0</h2></div>
-      <div class="stat glass-sm"><small>Saldo <u>Dividen</u></small><h2 id="pv-dividen">Rp 0</h2></div>
+    <!-- Saldo Utama BESAR -->
+    <div class="stat glass-sm big">
+      <small>Saldo Utama</small>
+      <h2 id="pv-saldo">Rp 0</h2>
     </div>
 
-    <div class="grid2">
-      <div class="stat glass-sm"><small>Bisa Ditarik Gratis (≥ 30 hari)</small><h2 id="pv-free">Rp 0</h2></div>
-      <div class="stat glass-sm"><small>Belum 30 Hari</small><h2 id="pv-locked">Rp 0</h2></div>
+    <!-- Chip kecil: Dividen & Bisa Ditarik Gratis -->
+    <div class="chips-row">
+      <div class="chip-stat"><small>Saldo Dividen</small><div id="pv-dividen">Rp 0</div></div>
+      <div class="chip-stat"><small>Bisa Ditarik Gratis (≥30 hari)</small><div id="pv-free">Rp 0</div></div>
     </div>
 
     <h2 class="mt16">Kepemilikan Anda</h2>
     <div class="chart-wrap glass-sm" style="padding:8px">
       <canvas id="pvPie" class="chart"></canvas>
     </div>
+    <div id="pvLegend" class="legend small"></div>
     <div class="muted small" id="pvShareText"></div>
 
     <div class="row mt16">
@@ -184,4 +199,4 @@
 
   <script src="/app.js"></script>
 </body>
-</html>
+                     </html>
