@@ -14,8 +14,7 @@ export default async function handler(req, res) {
     const r = await fetch(url, {
       headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, 'Accept': 'application/json' }
     });
-    const text = await r.text();
-    let j; try { j = JSON.parse(text); } catch { j = { raw: text }; }
+    const text = await r.text(); let j; try { j = JSON.parse(text); } catch { j = { raw: text }; }
     if (!r.ok) return res.status(r.status).json({ error: 'JSONBIN_GET_NON_200', detail: j });
 
     const record = j?.record || j;
