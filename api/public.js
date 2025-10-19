@@ -22,13 +22,13 @@ export default async function handler(req, res) {
       id: x.id || null,
       nama: x.nama,
       saldo: Number(x.saldo || 0),
-      bonus: Number(x.bonus || 0),
+      dividen: Number(x.dividen || 0), // pakai dividen
       history: Array.isArray(x.history) ? x.history : [],
       lots: Array.isArray(x.lots) ? x.lots : []
     }));
 
     let found = null;
-    if (qId)     found = list.find(x => (x.id || '').toLowerCase() === qId.toLowerCase());
+    if (qId)       found = list.find(x => (x.id || '').toLowerCase() === qId.toLowerCase());
     else if (qName) found = list.find(x => (x.nama || '').toLowerCase() === qName.toLowerCase());
 
     if (!found) return res.status(404).json({ found: false, message: 'Nasabah tidak ditemukan' });
