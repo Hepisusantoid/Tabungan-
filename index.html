@@ -20,8 +20,8 @@
   <section id="login-section" class="card glass tab beranda-tab">
     <h2>Login Admin</h2>
     <div class="row">
-      <input id="user" placeholder="Username">
-      <input id="pass" placeholder="Password" type="password">
+      <input id="user" placeholder="Username" autocomplete="username">
+      <input id="pass" placeholder="Password" type="password" autocomplete="current-password">
       <button id="btnLogin">Login</button>
     </div>
     <p id="loginMsg" class="muted"></p>
@@ -138,7 +138,7 @@
 
   <!-- HALAMAN PUBLIK (NASABAH) -->
   <section id="public-view" class="card glass" style="display:none">
-    <!-- HERO IMAGE PALING ATAS -->
+    <!-- HERO IMAGE -->
     <div class="hero glass-sm">
       <img id="pv-hero" src="/img/gambar1.png" alt="Tabungan Nasabah" loading="lazy">
     </div>
@@ -150,13 +150,11 @@
 
     <h1 id="pv-title" class="mt16">Halo, ...</h1>
 
-    <!-- Saldo Utama BESAR -->
     <div class="stat glass-sm big">
       <small>Saldo Utama</small>
       <h2 id="pv-saldo">Rp 0</h2>
     </div>
 
-    <!-- Chip kecil: Dividen & Bisa Ditarik Gratis -->
     <div class="chips-row">
       <div class="chip-stat"><small>Saldo Dividen</small><div id="pv-dividen">Rp 0</div></div>
       <div class="chip-stat"><small>Bisa Ditarik Gratis (≥30 hari)</small><div id="pv-free">Rp 0</div></div>
