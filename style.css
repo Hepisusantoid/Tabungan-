@@ -69,6 +69,12 @@ h1,h2{margin:6px 0 8px 0}
 .chip-stat small{display:block;color:var(--muted);margin-bottom:4px}
 .chip-stat div{font-weight:700}
 
+/* HERO IMAGE */
+.hero{position:relative;border-radius:12px;overflow:hidden;margin-bottom:12px;border:1px solid rgba(140,255,180,.12)}
+.hero img{display:block;width:100%;height:auto;max-height:260px;object-fit:cover}
+@media (min-width: 900px){ .hero img{max-height:340px} }
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.18));pointer-events:none}
+
 /* Chart */
 .chart-wrap{display:flex;justify-content:center;align-items:center;width:100%;overflow:hidden}
 canvas.chart{max-width:720px;width:100%;height:auto;aspect-ratio:1.6/1;border-radius:12px;display:block}
@@ -88,4 +94,4 @@ canvas.chart{max-width:720px;width:100%;height:auto;aspect-ratio:1.6/1;border-ra
   input,select{min-width:unset;flex:1}
   .table{min-width:640px}
   .legend{grid-template-columns:1fr}
-}
+       }
