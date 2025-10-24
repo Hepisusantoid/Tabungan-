@@ -2,14 +2,14 @@
 export const config = { runtime: 'nodejs' };
 
 export default async function handler(req, res) {
-  // Baca beberapa kemungkinan nama ENV agar tidak nyangkut di penamaan
+  // Support beberapa nama ENV agar tidak nyangkut di penamaan
   const ADMIN_USER =
     process.env.ADMIN_USER || process.env.ADMIN_USERNAME || process.env.ADMIN_NAME;
 
   const ADMIN_PASS =
     process.env.ADMIN_PASS || process.env.ADMIN_PASSWORD || process.env.ADMIN_PWD;
 
-  // Cek cepat dari browser: GET /api/login
+  // Diagnosis cepat: GET /api/login (cek ENV terbaca)
   if (req.method === 'GET') {
     return res.status(200).json({
       ok: false,
@@ -22,7 +22,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, message: 'Method not allowed' });
   }
 
-  // Body bisa string/obj tergantung runtime
   let body = {};
   try { body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); }
   catch { body = {}; }
