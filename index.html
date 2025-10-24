@@ -3,203 +3,55 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TabunganKu</title>
-  <link rel="stylesheet" href="/style.css">
+  <title>Tabungan</title>
+
+  <!-- Cegah cache HTML -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+
+  <!-- Cache-busting: ganti versinya saat update -->
+  <link rel="stylesheet" href="/style.css?v=2025-10-14c" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="aurora">
-  <!-- NAV -->
-  <header class="topbar glass" id="topbar">
+<body>
+  <header class="topbar" id="topbar">
     <nav class="nav">
-      <a href="#" data-tab="beranda" class="chip active">Beranda</a>
+      <a href="#" class="chip active">Beranda</a>
     </nav>
   </header>
 
   <!-- LOGIN -->
-  <section id="login-section" class="card glass tab beranda-tab">
+  <section id="login-section" class="card">
     <h2>Login Admin</h2>
     <div class="row">
-      <input id="user" placeholder="Username" autocomplete="username">
-      <input id="pass" placeholder="Password" type="password" autocomplete="current-password">
+      <input id="user" placeholder="Username" autocomplete="username" />
+      <input id="pass" placeholder="Password" type="password" autocomplete="current-password" />
       <button id="btnLogin">Login</button>
     </div>
     <p id="loginMsg" class="muted"></p>
   </section>
 
-  <!-- DASHBOARD / ADMIN -->
-  <section id="dashboard" class="card glass tab beranda-tab" style="display:none">
+  <!-- DASHBOARD (konten admin kamu taruh di dalam sini) -->
+  <section id="dashboard" class="card" style="display:none">
     <div class="row between">
       <h1>Dashboard Tabungan</h1>
-      <button id="btnLogout" class="secondary small">Keluar</button>
-    </div>
-    <p id="msg" class="warn"></p>
-
-    <div class="stats">
-      <div class="stat glass-sm"><small>Total Nasabah</small><h2 id="statNasabah">0</h2></div>
-      <div class="stat glass-sm"><small>Total Saldo</small><h2 id="statSaldo">Rp 0</h2></div>
-      <div class="stat glass-sm"><small>Saldo Rata-rata</small><h2 id="statRata">Rp 0</h2></div>
+      <button id="btnLogout" class="secondary">Logout</button>
     </div>
 
-    <div class="divider"></div>
-
-    <h2>Distribusi Kepemilikan Saldo</h2>
-    <div class="chart-wrap glass-sm" style="padding:8px">
-      <canvas id="adminPie" class="chart"></canvas>
-    </div>
-    <div id="adminLegend" class="legend"></div>
-
-    <div class="divider"></div>
-
-    <h2>Form Penghasilan & Pembagian <u>Dividen</u></h2>
-    <div class="row">
-      <input id="revAmount" placeholder="Nominal penghasilan (contoh 1.000.000)" inputmode="numeric">
-      <button id="revDistribute">Bagi ke Semua</button>
-    </div>
-    <div class="muted small">
-      Penghasilan dibagi proporsional berdasar % <b>saldo pokok</b>. Masuk ke <b>Saldo Dividen</b> + riwayat (type: <i>dividen</i>).
-    </div>
-
-    <div class="divider"></div>
-
-    <h2>Daftar Nasabah</h2>
-    <div class="table-wrap">
-      <table id="tNasabah" class="table">
-        <thead><tr><th>Nama</th><th>ID</th><th>Saldo</th><th>Dividen</th><th>Aksi</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="divider"></div>
-
-    <h2>Tambah Nasabah Baru</h2>
-    <div class="row">
-      <input id="namaBaru" placeholder="Nama Nasabah">
-      <input id="saldoBaru" placeholder="Saldo Awal" inputmode="numeric">
-      <button id="btnTambah">Tambah Nasabah</button>
-    </div>
-    <div class="muted small">ID dibuat otomatis & unik.</div>
-
-    <h2>Edit Saldo (dengan Tanggal)</h2>
-    <div class="row">
-      <select id="namaEditSel" title="Pilih Nasabah"></select>
-      <input id="saldoEdit" placeholder="Jumlah" inputmode="numeric">
-      <select id="aksiEdit" title="Jenis aksi">
-        <option value="tambah">Tambah Saldo</option>
-        <option value="kurangi">Tarik Saldo</option>
-        <option value="koreksi">Koreksi (Penyesuaian)</option>
-      </select>
-      <input id="tglEdit" type="date" title="Tanggal (opsional)">
-      <input id="jamEdit" type="time" step="60" title="Jam (opsional)">
-      <input id="catatanEdit" placeholder="Catatan (opsional)" style="flex:1;min-width:220px">
-      <button id="btnEdit">Simpan</button>
-    </div>
-
-    <div class="divider"></div>
-
-    <h2>Edit <u>Dividen</u> Nasabah</h2>
-    <div class="row">
-      <select id="divNamaSel" title="Pilih Nasabah"></select>
-      <input id="divJumlah" placeholder="Jumlah" inputmode="numeric">
-      <select id="divAksi" title="Jenis aksi">
-        <option value="tambah">Tambah Dividen</option>
-        <option value="kurangi">Kurangi / Tarik Dividen</option>
-      </select>
-      <input id="divTgl" type="date" title="Tanggal (opsional)">
-      <input id="divJam" type="time" step="60" title="Jam (opsional)">
-      <input id="divCatatan" placeholder="Catatan (opsional)" style="flex:1;min-width:220px">
-      <button id="divBtn">Simpan Dividen</button>
-    </div>
-
-    <div class="divider"></div>
-
-    <h2>Kelola Riwayat Transaksi</h2>
-    <div class="row">
-      <select id="riwNama" title="Pilih Nasabah"></select>
-      <button id="riwRefresh" class="secondary small">Muat Riwayat</button>
-    </div>
-    <div id="riwEmpty" class="muted" style="display:none">Belum ada riwayat.</div>
-    <div class="table-wrap">
-      <table id="riwTable" class="table">
-        <thead><tr><th>#</th><th>Tanggal</th><th>Jenis</th><th>Nominal</th><th>Catatan</th><th>Hapus</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div class="divider"></div>
-
-    <h2>Edit Nama Nasabah</h2>
-    <div class="row">
-      <select id="oldNameSel" title="Nama Lama"></select>
-      <input id="newName" placeholder="Nama Baru">
-      <button id="btnRename">Ubah Nama</button>
-    </div>
+    <!-- contoh slot; ganti dengan kontenmu -->
+    <p class="muted">Anda telah login. Konten admin akan tampil di sini.</p>
+    <div id="admin-root"><!-- isi dashboard kamu --></div>
   </section>
 
-  <!-- HALAMAN PUBLIK (NASABAH) -->
-  <section id="public-view" class="card glass" style="display:none">
-    <!-- HERO IMAGE -->
-    <div class="hero glass-sm">
-      <img id="pv-hero" src="/img/gambar1.png" alt="Tabungan Nasabah" loading="lazy">
-    </div>
-
-    <div class="trust glass-sm">
-      <strong>Lebih simpel dari bank</strong> — tanpa ribet, tanpa antre, gratis simpan ≥ 1 bulan.
-      <br>Tarik kapan saja ke <strong>Hepi Susanto</strong>, cair cepat via WhatsApp.
-    </div>
-
-    <h1 id="pv-title" class="mt16">Halo, ...</h1>
-
-    <div class="stat glass-sm big">
-      <small>Saldo Utama</small>
-      <h2 id="pv-saldo">Rp 0</h2>
-    </div>
-
-    <div class="chips-row">
-      <div class="chip-stat"><small>Saldo Dividen</small><div id="pv-dividen">Rp 0</div></div>
-      <div class="chip-stat"><small>Bisa Ditarik Gratis (≥30 hari)</small><div id="pv-free">Rp 0</div></div>
-    </div>
-
-    <h2 class="mt16">Kepemilikan Anda</h2>
-    <div class="chart-wrap glass-sm" style="padding:8px">
-      <canvas id="pvPie" class="chart"></canvas>
-    </div>
-    <div id="pvLegend" class="legend small"></div>
-    <div class="muted small" id="pvShareText"></div>
-
-    <div class="row mt16">
-      <input id="pv-amount" placeholder="Nominal (contoh 100.000)" inputmode="numeric">
-      <button id="pv-add">Tambah Tabungan</button>
-      <button id="pv-withdraw" class="secondary">Tarik Tabungan</button>
-    </div>
-    <div id="pv-fee" class="muted small"></div>
-
-    <div class="divider"></div>
-    <details class="glass-sm">
-      <summary><strong>Biaya Admin (jika tarik sebelum 30 hari)</strong></summary>
-      <ul class="fee-list">
-        <li>&lt; 350.000 → Rp 3.000</li>
-        <li>&lt; 600.000 → Rp 5.000</li>
-        <li>&lt; 800.000 → Rp 7.000</li>
-        <li>&lt; 2.000.000 → Rp 10.000</li>
-        <li>&lt; 5.500.000 → Rp 20.000</li>
-        <li>&lt; 6.500.000 → Rp 25.000</li>
-        <li>&lt; 15.000.000 → Rp 30.000</li>
-        <li>&gt; 15.000.000 → + Rp 2.000 / 1.000.000</li>
-      </ul>
-    </details>
-
-    <div class="divider"></div>
-    <h2>Riwayat Transaksi</h2>
-    <div id="pv-empty" class="muted">Belum ada transaksi.</div>
-    <div class="table-wrap">
-      <table id="pv-history" class="table">
-        <thead><tr><th>Tanggal</th><th>Jenis</th><th>Nominal</th><th>Catatan</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
+  <!-- HALAMAN PUBLIK (tautan nasabah). Biarkan ada; akan dipakai jika URL ?id=... -->
+  <section id="public-view" style="display:none">
+    <h2>Link Nasabah</h2>
+    <div id="public-root"><!-- konten publikmu --></div>
   </section>
 
-  <script src="/app.js"></script>
+  <!-- Taruh di akhir body, pakai versi agar tidak ke-cache -->
+  <script src="/app.js?v=2025-10-14c"></script>
 </body>
-        </html>
+</html>
