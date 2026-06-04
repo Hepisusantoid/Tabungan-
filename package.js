@@ -1,12 +1,11 @@
 {
-  "name": "tabungan-website",
-  "version": "1.0.0",
-  "description": "Website tabungan sederhana dengan JSONBin",
+  "name": "hepi-tabungan",
+  "version": "3.0.0",
+  "description": "Hepi Tabungan — Platform tabungan Hepi Susanto",
   "scripts": {
     "dev": "vercel dev"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@vercel/node": "^2.0.0"
+    "@vercel/node": "^3.0.0"
   }
 }
