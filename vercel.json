@@ -1,3 +1,9 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/get",    "destination": "/api/get.js"    },
+    { "source": "/api/put",    "destination": "/api/put.js"    },
+    { "source": "/api/login",  "destination": "/api/login.js"  },
+    { "source": "/api/public", "destination": "/api/public.js" }
+  ]
 }
