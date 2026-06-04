@@ -1,37 +1,19 @@
-export const config = { runtime: 'nodejs' };
-
 export default async function handler(req, res) {
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+  const { JSONBIN_BASE, JSONBIN_BIN_ID, JSONBIN_MASTER_KEY } = process.env;
+  if (!JSONBIN_BASE || !JSONBIN_BIN_ID || !JSONBIN_MASTER_KEY)
+    return res.status(500).json({ error: 'ENV_MISSING' });
   try {
-    if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
-    const qId   = (req.query.id   || '').toString().trim();
-    const qName = (req.query.name || req.query.n || '').toString().trim();
-
-    const { JSONBIN_BASE, JSONBIN_BIN_ID, JSONBIN_MASTER_KEY } = process.env;
-    if (!JSONBIN_BASE || !JSONBIN_BIN_ID || !JSONBIN_MASTER_KEY)
-      return res.status(500).json({ error: 'ENV_MISSING' });
-
-    const url = `${JSONBIN_BASE}/b/${JSONBIN_BIN_ID}/latest`;
-    const r   = await fetch(url, { headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, Accept: 'application/json' } });
-    const text = await r.text(); let j;
-    try { j = JSON.parse(text); } catch { j = { raw: text }; }
+    const r = await fetch(`${JSONBIN_BASE}/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, Accept: 'application/json' }
+    });
+    const t = await r.text(); let j;
+    try { j = JSON.parse(t); } catch { j = { raw: t }; }
     if (!r.ok) return res.status(r.status).json({ error: 'JSONBIN_ERROR', detail: j });
-
-    const list = (j?.record?.nasabah || []).map(x => ({
-      id:      x.id   || null,
-      nama:    x.nama || '',
-      saldo:   Number(x.saldo   || 0),
-      dividen: Number(x.dividen || 0),
-      history: Array.isArray(x.history) ? x.history : [],
-      lots:    Array.isArray(x.lots)    ? x.lots    : []
-    }));
-
-    let found = null;
-    if      (qId)   found = list.find(x => (x.id   || '').toLowerCase() === qId.toLowerCase());
-    else if (qName) found = list.find(x => (x.nama || '').toLowerCase() === qName.toLowerCase());
-
-    if (!found) return res.status(404).json({ found: false, message: 'Nasabah tidak ditemukan' });
-    return res.status(200).json({ found: true, nasabah: found });
+    const data = j?.record;
+    if (!data || typeof data !== 'object') return res.status(200).json({ nasabah: [] });
+    if (!Array.isArray(data.nasabah)) data.nasabah = [];
+    return res.status(200).json(data);
   } catch (e) {
     return res.status(500).json({ error: 'FETCH_ERROR', message: e?.message || String(e) });
   }
