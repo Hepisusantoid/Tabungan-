@@ -1,38 +1,38 @@
+export const config = { runtime: 'nodejs' };
+
 export default async function handler(req, res) {
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
-
-  const id = ((req.query || {}).id || '').toString().trim();
-  if (!id) return res.status(400).json({ found: false, message: 'Missing ?id=' });
-
-  const { JSONBIN_BASE, JSONBIN_BIN_ID, JSONBIN_MASTER_KEY } = process.env;
-  if (!JSONBIN_BASE || !JSONBIN_BIN_ID || !JSONBIN_MASTER_KEY)
-    return res.status(500).json({ error: 'ENV_MISSING' });
-
   try {
-    const r = await fetch(`${JSONBIN_BASE}/b/${JSONBIN_BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, Accept: 'application/json' }
-    });
-    const t = await r.text(); let j;
-    try { j = JSON.parse(t); } catch { j = { raw: t }; }
-    if (!r.ok) return res.status(r.status).json({ found: false, message: 'Gagal mengambil data.' });
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-    const list = Array.isArray(j?.record?.nasabah) ? j.record.nasabah : [];
-    const found = list.find(x => (x.id || '').toUpperCase() === id.toUpperCase());
-    if (!found) return res.status(404).json({ found: false, message: 'Nasabah tidak ditemukan.' });
+    const qId   = (req.query.id   || '').toString().trim();
+    const qName = (req.query.name || req.query.n || '').toString().trim();
 
-    // Hanya expose field yang diperlukan (keamanan)
-    return res.status(200).json({
-      found: true,
-      nasabah: {
-        id:      found.id,
-        nama:    found.nama,
-        saldo:   Number(found.saldo   || 0),
-        dividen: Number(found.dividen || 0),
-        history: Array.isArray(found.history) ? found.history : [],
-        lots:    Array.isArray(found.lots)    ? found.lots    : []
-      }
-    });
+    const { JSONBIN_BASE, JSONBIN_BIN_ID, JSONBIN_MASTER_KEY } = process.env;
+    if (!JSONBIN_BASE || !JSONBIN_BIN_ID || !JSONBIN_MASTER_KEY)
+      return res.status(500).json({ error: 'ENV_MISSING' });
+
+    const url = `${JSONBIN_BASE}/b/${JSONBIN_BIN_ID}/latest`;
+    const r   = await fetch(url, { headers: { 'X-Master-Key': JSONBIN_MASTER_KEY, Accept: 'application/json' } });
+    const text = await r.text(); let j;
+    try { j = JSON.parse(text); } catch { j = { raw: text }; }
+    if (!r.ok) return res.status(r.status).json({ error: 'JSONBIN_ERROR', detail: j });
+
+    const list = (j?.record?.nasabah || []).map(x => ({
+      id:      x.id   || null,
+      nama:    x.nama || '',
+      saldo:   Number(x.saldo   || 0),
+      dividen: Number(x.dividen || 0),
+      history: Array.isArray(x.history) ? x.history : [],
+      lots:    Array.isArray(x.lots)    ? x.lots    : []
+    }));
+
+    let found = null;
+    if      (qId)   found = list.find(x => (x.id   || '').toLowerCase() === qId.toLowerCase());
+    else if (qName) found = list.find(x => (x.nama || '').toLowerCase() === qName.toLowerCase());
+
+    if (!found) return res.status(404).json({ found: false, message: 'Nasabah tidak ditemukan' });
+    return res.status(200).json({ found: true, nasabah: found });
   } catch (e) {
-    return res.status(500).json({ found: false, message: e?.message || String(e) });
+    return res.status(500).json({ error: 'FETCH_ERROR', message: e?.message || String(e) });
   }
 }
