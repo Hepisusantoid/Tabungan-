@@ -150,8 +150,8 @@ select.inp { cursor: pointer; }
 
 /* ── PUBLIC HERO ── */
 .pub-hero { background: linear-gradient(160deg, #1a5fa8 0%, #1e6ec0 100%); padding: 24px 16px 28px; }
-.pub-hero-lbl { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
-.pub-hero-name { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.pub-hero-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.pub-hero-lbl { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
 .pub-hero-amount { font-size: 36px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.5px; }
 .pub-hero-since { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 8px; }
 
@@ -226,4 +226,4 @@ select.inp { cursor: pointer; }
   .stat-grid { grid-template-columns: 1fr; }
   .pub-btn-grid { grid-template-columns: 1fr; }
   .pub-saldo-row { grid-template-columns: 1fr; }
-               }
+   }
