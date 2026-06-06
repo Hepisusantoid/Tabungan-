@@ -7,54 +7,242 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="stylesheet" href="/style.css?v=3" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css?v=4" />
 </head>
 <body>
 
-  <!-- TOPBAR -->
-  <header class="topbar" id="topbar">
-    <nav class="nav">
-      <div class="nav-brand">
+  <!-- ===== LOGIN ===== -->
+  <div id="page-login" class="page-center">
+    <div class="login-card">
+      <div class="login-logo">
         <div class="logo-h">H</div>
-        <span class="nav-title">Hepi Tabungan</span>
+        <div>
+          <div class="login-brand-name">Hepi Tabungan</div>
+          <div class="login-brand-sub">Admin Dashboard</div>
+        </div>
       </div>
-    </nav>
-  </header>
+      <input id="l-user" class="inp" placeholder="Username" autocomplete="username" />
+      <input id="l-pass" class="inp" placeholder="Password" type="password" autocomplete="current-password" />
+      <button id="btn-login" class="btn-blue w100">Masuk</button>
+      <p id="login-err" class="err-msg"></p>
+    </div>
+  </div>
 
-  <!-- LOGIN -->
-  <section id="login-section" class="card login-card">
-    <div class="login-brand">
-      <div class="logo-h lg">H</div>
-      <div>
-        <div class="login-title">Hepi Tabungan</div>
-        <div class="login-sub">Admin Dashboard</div>
+  <!-- ===== ADMIN DASHBOARD ===== -->
+  <div id="page-admin" style="display:none">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="topbar-brand">
+          <div class="logo-h sm">H</div>
+          <span class="topbar-title">Hepi Tabungan</span>
+        </div>
+        <button id="btn-logout" class="btn-ghost">Keluar</button>
       </div>
     </div>
-    <div class="row">
-      <input id="user" placeholder="Username" autocomplete="username" />
-      <input id="pass" placeholder="Password" type="password" autocomplete="current-password" />
-      <button id="btnLogin" class="primary">Login</button>
+    <!-- Tab bar -->
+    <div class="tabbar">
+      <button class="tab active" data-tab="ringkasan">Ringkasan</button>
+      <button class="tab" data-tab="nasabah">Nasabah</button>
+      <button class="tab" data-tab="saldo">Edit Saldo</button>
+      <button class="tab" data-tab="dividen">Dividen</button>
+      <button class="tab" data-tab="riwayat">Riwayat</button>
     </div>
-    <p id="loginMsg" class="muted"></p>
-  </section>
+    <!-- Content -->
+    <div class="admin-content">
+      <div id="toast" class="toast" style="display:none"></div>
 
-  <!-- DASHBOARD -->
-  <section id="dashboard" class="card" style="display:none">
-    <div class="row between">
-      <div class="dash-brand">
-        <div class="logo-h sm">H</div>
-        <h1>Dashboard Tabungan</h1>
+      <!-- TAB: RINGKASAN -->
+      <div class="tab-panel active" id="panel-ringkasan">
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-lbl">Total Nasabah</div><div class="stat-val" id="st-nasabah">0</div></div>
+          <div class="stat-card"><div class="stat-lbl">Total Tabungan</div><div class="stat-val blue" id="st-total">Rp 0</div></div>
+          <div class="stat-card"><div class="stat-lbl">Total Dividen</div><div class="stat-val blue" id="st-dividen">Rp 0</div></div>
+          <div class="stat-card"><div class="stat-lbl">Rata-rata Saldo</div><div class="stat-val" id="st-rata">Rp 0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Daftar Nasabah</span>
+            <input id="search-input" class="search-inp" placeholder="Cari nama..." />
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Nama</th><th>Saldo</th><th>Dividen</th><th>Aksi</th></tr></thead>
+              <tbody id="tbody-ringkasan"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <button id="btnLogout" class="secondary">Logout</button>
-    </div>
-    <div id="admin-root"></div>
-  </section>
 
-  <!-- PUBLIC VIEW -->
-  <section id="public-view" style="display:none">
-    <!-- topbar publik dengan logo -->
+      <!-- TAB: NASABAH -->
+      <div class="tab-panel" id="panel-nasabah">
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title mb10">Tambah Nasabah</div>
+            <label class="lbl">Nama</label>
+            <input id="n-nama" class="inp w100 mb8" placeholder="Nama lengkap" />
+            <label class="lbl">Saldo Awal (opsional)</label>
+            <div class="inp-pfx-wrap mb8"><span class="pfx">Rp</span><input id="n-saldo" class="inp pfx" placeholder="0" inputmode="numeric" /></div>
+            <button id="btn-tambah-nas" class="btn-blue w100">Tambah Nasabah</button>
+          </div>
+          <div class="card">
+            <div class="card-title mb10">Ubah Nama</div>
+            <label class="lbl">Pilih Nasabah</label>
+            <select id="sel-rename-lama" class="inp w100 mb8"></select>
+            <label class="lbl">Nama Baru</label>
+            <input id="inp-rename-baru" class="inp w100 mb8" placeholder="Nama baru" />
+            <button id="btn-rename" class="btn-outline w100">Ubah Nama</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title mb10">Semua Nasabah</div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Nama</th><th>ID</th><th>Saldo</th><th>Dividen</th><th>Link</th><th>Hapus</th></tr></thead>
+              <tbody id="tbody-nasabah"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: EDIT SALDO -->
+      <div class="tab-panel" id="panel-saldo">
+        <div class="card">
+          <div class="card-title mb10">Edit Saldo Nasabah</div>
+          <div class="form-row">
+            <div class="form-col">
+              <label class="lbl">Pilih Nasabah</label>
+              <select id="sel-edit-nas" class="inp w100"></select>
+            </div>
+            <div class="form-col">
+              <label class="lbl">Jenis Aksi</label>
+              <select id="sel-edit-aksi" class="inp w100">
+                <option value="tambah">Tambah Saldo</option>
+                <option value="kurangi">Tarik / Kurangi</option>
+                <option value="koreksi">Koreksi Langsung</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-col">
+              <label class="lbl">Nominal</label>
+              <div class="inp-pfx-wrap"><span class="pfx">Rp</span><input id="inp-edit-nominal" class="inp pfx" placeholder="0" inputmode="numeric" /></div>
+            </div>
+            <div class="form-col">
+              <label class="lbl">Tanggal (opsional)</label>
+              <input id="inp-edit-tgl" class="inp w100" type="date" />
+            </div>
+            <div class="form-col">
+              <label class="lbl">Jam (opsional)</label>
+              <input id="inp-edit-jam" class="inp w100" type="time" />
+            </div>
+          </div>
+          <div class="form-col mb10">
+            <label class="lbl">Catatan</label>
+            <input id="inp-edit-catatan" class="inp w100" placeholder="Catatan transaksi (opsional)" />
+          </div>
+          <div id="saldo-preview" class="preview-box" style="display:none">
+            <span id="prev-before"></span><span class="prev-arr">→</span><strong id="prev-after"></strong>
+          </div>
+          <button id="btn-simpan-saldo" class="btn-blue">Simpan Transaksi</button>
+        </div>
+      </div>
+
+      <!-- TAB: DIVIDEN -->
+      <div class="tab-panel" id="panel-dividen">
+        <div class="card">
+          <div class="card-title mb4">Bagikan Dividen Proporsional</div>
+          <p class="card-desc">Penghasilan dibagi proporsional berdasarkan saldo pokok, masuk ke saldo dividen masing-masing nasabah.</p>
+          <div class="form-row">
+            <div class="form-col">
+              <label class="lbl">Total Penghasilan</label>
+              <div class="inp-pfx-wrap"><span class="pfx">Rp</span><input id="inp-rev" class="inp pfx" placeholder="0" inputmode="numeric" /></div>
+            </div>
+            <div class="form-col">
+              <label class="lbl">Catatan</label>
+              <input id="inp-rev-cat" class="inp w100" placeholder="cth: Dividen Okt 2025" />
+            </div>
+          </div>
+          <div id="div-preview" class="div-preview" style="display:none">
+            <div class="div-preview-title">Preview Pembagian</div>
+            <div id="div-preview-list"></div>
+          </div>
+          <div class="btn-row">
+            <button id="btn-preview-div" class="btn-outline">Preview</button>
+            <button id="btn-bagikan-div" class="btn-blue">Bagikan Dividen</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title mb4">Edit Dividen Per Nasabah</div>
+          <p class="card-desc">Tambah, kurangi, atau tarik dividen satu nasabah. Tidak mempengaruhi saldo pokok.</p>
+          <div class="form-row">
+            <div class="form-col">
+              <label class="lbl">Pilih Nasabah</label>
+              <select id="sel-div-edit" class="inp w100"></select>
+            </div>
+            <div class="form-col">
+              <label class="lbl">Dividen Saat Ini</label>
+              <div class="div-current" id="div-current-val">Rp 0</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-col">
+              <label class="lbl">Nominal</label>
+              <div class="inp-pfx-wrap"><span class="pfx">Rp</span><input id="inp-div-nominal" class="inp pfx" placeholder="0" inputmode="numeric" /></div>
+            </div>
+            <div class="form-col">
+              <label class="lbl">Jenis</label>
+              <select id="sel-div-aksi" class="inp w100">
+                <option value="tambah">Tambah Dividen</option>
+                <option value="kurangi">Tarik Dividen</option>
+              </select>
+            </div>
+            <div class="form-col">
+              <label class="lbl">Catatan</label>
+              <input id="inp-div-cat" class="inp w100" placeholder="opsional" />
+            </div>
+          </div>
+          <button id="btn-simpan-div" class="btn-blue">Simpan Dividen</button>
+        </div>
+        <div class="card">
+          <div class="card-title mb10">Dividen Semua Nasabah</div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>Nama</th><th>Saldo Pokok</th><th>Dividen</th><th>Porsi %</th></tr></thead>
+              <tbody id="tbody-dividen"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: RIWAYAT -->
+      <div class="tab-panel" id="panel-riwayat">
+        <div class="card">
+          <div class="card-title mb10">Riwayat Transaksi</div>
+          <div class="form-row align-end mb10">
+            <div class="form-col">
+              <label class="lbl">Pilih Nasabah</label>
+              <select id="sel-riw" class="inp w100"></select>
+            </div>
+            <button id="btn-muat-riw" class="btn-outline">Muat Riwayat</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr><th>#</th><th>Tanggal</th><th>Jenis</th><th>Nominal</th><th>Catatan</th><th>Hapus</th></tr></thead>
+              <tbody id="tbody-riw"></tbody>
+            </table>
+          </div>
+          <p id="riw-empty" class="empty-txt">Pilih nasabah lalu klik "Muat Riwayat"</p>
+          <p class="note-txt">⚠ Menghapus riwayat tidak mengubah saldo.</p>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </div><!-- /page-admin -->
+
+  <!-- ===== PUBLIC VIEW ===== -->
+  <div id="page-public" style="display:none">
+    <!-- Topbar publik -->
     <div class="pub-topbar">
       <div class="logo-h sm">H</div>
       <div>
@@ -62,9 +250,83 @@
         <div class="pub-topbar-sub">Kelola tabunganmu dengan mudah</div>
       </div>
     </div>
-    <div id="public-root"></div>
-  </section>
+    <!-- Hero saldo -->
+    <div class="pub-hero">
+      <div class="pub-hero-lbl">Tabungan kamu di Hepi masih tersedia</div>
+      <div class="pub-hero-name" id="pub-nama">—</div>
+      <div class="pub-hero-amount" id="pub-saldo">Rp 0</div>
+      <div class="pub-hero-since" id="pub-since"></div>
+    </div>
+    <!-- Bonus bar -->
+    <div class="pub-bonus-bar" id="pub-bonus-bar" style="display:none">
+      <div class="bonus-icon">🎁</div>
+      <div class="bonus-text" id="pub-bonus-text">Kamu dapat bonus dari Hepi</div>
+      <button class="btn-tarik-bonus" id="btn-tarik-bonus">Tarik</button>
+    </div>
+    <!-- Input & fee -->
+    <div class="pub-card">
+      <div class="fee-toggle" id="fee-toggle">
+        <span>ℹ Info Biaya Penarikan</span><span id="fee-icon">▾</span>
+      </div>
+      <div id="fee-detail" style="display:none">
+        <div class="fee-grid">
+          <span>Rp 0 – 700.000</span><span class="fee-val">Rp 5.000</span>
+          <span>Rp 800.000 – 2.000.000</span><span class="fee-val">Rp 10.000</span>
+          <span>Rp 2.100.000 – 3.000.000</span><span class="fee-val">Rp 15.000</span>
+          <span>Rp 3.100.000 – 5.000.000</span><span class="fee-val">Rp 20.000</span>
+          <span>Rp 5.000.000 – 7.000.000</span><span class="fee-val">Rp 25.000</span>
+          <span>Rp 7.100.000 – 10.000.000</span><span class="fee-val">Rp 30.000</span>
+        </div>
+        <div class="fee-free-note" id="fee-free-note"></div>
+      </div>
+      <!-- Sub saldo info -->
+      <div class="pub-saldo-row">
+        <div class="pub-saldo-item">
+          <div class="pub-saldo-lbl">Bisa Tarik Gratis (≥30 hari)</div>
+          <div class="pub-saldo-val" id="pub-free">Rp 0</div>
+        </div>
+        <div class="pub-saldo-item">
+          <div class="pub-saldo-lbl">Saldo Dividen</div>
+          <div class="pub-saldo-val" id="pub-dividen">Rp 0</div>
+        </div>
+      </div>
+      <!-- Input nominal -->
+      <label class="pub-inp-lbl">Nominal penarikan / setoran</label>
+      <div class="pub-inp-row">
+        <span class="pub-inp-pfx">Rp</span>
+        <input id="pub-amount" placeholder="0" inputmode="numeric" />
+      </div>
+      <div class="fee-calc-note" id="fee-calc-note"></div>
+      <!-- Tombol aksi -->
+      <div class="pub-btn-grid">
+        <button class="btn-blue" id="pub-btn-tambah">+ Tambah Tabungan</button>
+        <button class="btn-outline" id="pub-btn-tarik">↓ Tarik Tabungan</button>
+      </div>
+    </div>
+    <!-- Riwayat -->
+    <div class="pub-card">
+      <div class="pub-riw-head">
+        <span class="card-title">Riwayat Transaksi</span>
+        <span class="riw-count" id="pub-riw-count">0 transaksi</span>
+      </div>
+      <div id="pub-riw-list"><p class="empty-txt" id="pub-riw-empty">Belum ada transaksi</p></div>
+    </div>
+    <div class="pub-footer">
+      Dikelola oleh <strong>Hepi Susanto</strong> ·
+      <a href="https://wa.me/6285346861655" target="_blank" rel="noopener">Hubungi via WhatsApp</a>
+    </div>
+  </div><!-- /page-public -->
 
-  <script src="/app.js?v=3"></script>
+  <!-- ===== NOT FOUND ===== -->
+  <div id="page-notfound" class="page-center" style="display:none">
+    <div class="notfound-card">
+      <div class="logo-h" style="margin:0 auto 14px;width:52px;height:52px;font-size:26px;border-radius:13px">H</div>
+      <h2 style="margin:0 0 8px">Tautan Tidak Valid</h2>
+      <p style="color:#718096;margin-bottom:20px">Nasabah tidak ditemukan. Pastikan link sudah benar.</p>
+      <a href="https://wa.me/6285346861655" target="_blank" class="btn-blue" style="text-decoration:none;display:inline-block">Hubungi Admin</a>
+    </div>
+  </div>
+
+  <script src="/app.js?v=4"></script>
 </body>
-</html>
+  </html>
