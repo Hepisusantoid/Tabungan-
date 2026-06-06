@@ -505,11 +505,21 @@ function initPublic(nas, allNasabah) {
   const hist   = nas.history || [];
   const free   = freeAmount(nas);
 
-  /* Hero */
-  g('pub-nama').textContent  = nas.nama;
-  g('pub-saldo').textContent = fmt(saldo);
-  g('pub-free').textContent  = fmt(free);
+  /* Hero — nama di atas label */
+  g('pub-nama').textContent    = nas.nama;
+  g('pub-saldo').textContent   = fmt(saldo);
   g('pub-dividen').textContent = fmt(dividen);
+
+  /* Kotak "Bisa Tarik Gratis" hanya tampil jika saldo > 0 */
+  const freeBox = document.querySelector('.pub-saldo-item:first-child');
+  if (freeBox) {
+    if (saldo <= 0) {
+      freeBox.style.display = 'none';
+    } else {
+      freeBox.style.display = 'block';
+      g('pub-free').textContent = fmt(free);
+    }
+  }
 
   /* Bergabung sejak */
   if (hist.length) {
@@ -606,4 +616,4 @@ function renderPublicRiw(hist) {
       <div class="riw-amount ${amtCls}">${sign} ${fmt(it.amount||0)}</div>
     </div>`;
   }).join('');
-                                                                                      }
+}
